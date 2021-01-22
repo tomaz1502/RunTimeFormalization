@@ -1,0 +1,116 @@
+#+TITLE: Formalização da Complexidade Temporal de Algoritmos de Ordenação em Lean
+
+* [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/src/Formalization.lean][Main File]]
+
+* [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/_target/deps/mathlib/src/data/list/sort.lean][Mathlib Code]]
+
+* [[https://leanprover.zulipchat.com/#narrow/stream/113488-general/topic/BSc.20Final.20Project][Zulip Discussion]]
+
+* [[~/Desktop/Tom/Grad/POC/POCII/Propose/Proposta.pdf][Propose]]
+
+* Main Goals
+** Prove that ~insertion_sort~ doesn't execute more than n ^ 2 comparisons
+** Prove that ~merge_sort~ doesn't execute more than n * log(n) comparisons
+
+* Use a [[https://wiki.haskell.org/Typeclassopedia#Monad][Monad]] to keep count of comparisons ([[https://www.twanvl.nl/blog/agda/sorting][Tutorial]])
+** Why are the two definitions of sorted equivalent in the tutorial? (Answered)
+#+BEGIN_SRC haskell
+-- Sorted permutations of a list
+data Sorted : List A → Set  where
+  []   : Sorted []
+  cons : ∀ x {xs xxs}
+       → (p : x ◂ xs ≡ xxs) -- inserting x somewhere into xs gives xxs
+       → (least : x ≤* xs)  -- x is the smallest element of the list
+       → (rest : Sorted xs) -- and we have also sorted xs
+       → Sorted xxs
+
+record Sorted' (xs : List A) : Set where
+  field
+    ys       : List A
+    isSorted : IsSorted ys
+    isPerm   : IsPermutation ys xs
+#+END_SRC
+
+These two are equivalent: the first one first deconstruct the list, with its smallest element. It is
+implicitly asserting that x :: xs is xxs sorted
+
+** How it works (what I've understand)
+First, define a dependent type "in-time", that takes a type (in our case would be "Sorted (sort xs)")
+and a natural n. A term of type "A in-time n" is a proof that A is constructed in at most n steps.
+Here is how the tutorial implements this and how I translated to Lean:
+#+BEGIN_SRC haskell
+data _in-time_ {a} (A : Set a) (n : ℕ) : Set a where
+    box : A → A in-time n
+#+END_SRC
+#+BEGIN_SRC lean
+inductive inTime : Prop → ℕ → Prop
+| box {α : Prop} {n : ℕ} : inTime α n
+#+END_SRC
+
+This "box" constructor could be a proof that any computation has any running time, but it should be private.
+The author of the tutorial defines that comparing two elements takes 1 step:
+#+BEGIN_SRC haskell
+_≤?_ : (x y : A) → (x ≤ y ⊎ y ≤ x) in-time 1
+#+END_SRC
+Which I translated to:
+#+BEGIN_SRC lean
+axiom compare : ∀ {α : Type} [has_le α] {x y : α},
+  inTime (x ≤ y \/ y ≤ x) 1
+#+END_SRC
+
+Also, he defines the monad operators to be able to compose two computations, by summing their running times:
+#+BEGIN_SRC haskell
+_>>=_ : ∀ {a b} {A : Set a} {B : Set b} → {n m : ℕ} → A in-time n → (A → B in-time m) → B in-time (n + m)
+#+END_SRC
+
+I didn't translated it to Lean yet. The idea seems to construct the sorting function using this new operators.
+This way, the type of the sorting function will already state the running time it takes. In the example of the
+tutorial, we have something like:
+#+BEGIN_SRC haskell
+  insertion-sort : (xs : List A) → Sorted xs in-time length xs ^ 2
+#+END_SRC
+
+Where Sorted is the dependent type he defined to represent a sorted list. Mathlib takes another approach to
+prove the correctness of sorting. Instead of embedding this in the type of the function, it first defines the
+function and then, separately proves that it satisfies some property. We have something like:
+
+#+BEGIN_SRC lean
+def insertion_sort : list α → list α
+#+END_SRC
+
+And, somewhere else:
+
+#+BEGIN_SRC lean
+theorem sorted_insertion_sort : ∀ l, sorted r (insertion_sort r l)
+#+END_SRC
+
+To prove statements about running type, I will have to adapt the technique of the tutorial to this style.
+I think the way to go would be to have the following theorem:
+#+BEGIN_SRC lean
+theorem rt_insertion_sort : ∀ l, inTime (sorted r (insertion_sort r l)) (l.length * l.length)
+#+END_SRC
+
+Or, perhaps, another possibility would be to modify the type inTime to take a function as first
+argument and prove something like
+#+BEGIN_SRC lean
+theorem rt_insertion_sort : ∀ l, inTime' (insertion_sort r l) (l.length * l.length)
+#+END_SRC
+
+In fact, I don't know if any of this is possible without modifying insertion-sort to keep counting the
+comparisons using the monad operators... I'll have to think more about it.
+
+Questions (to Haniel)
+- If it turns out to be impossible to adapt the technique, would it be okay to write another version
+  of insertion sort and merge sort? I don't know if this is what was said in the Zulip post I've made,
+  if they meant to rewrite the functions to add the bookkeeping.
+- Sometimes it seems that this tutorial is "cheating"... for example, it says that
+  "box" constructor is private, but to prove the base case of insertion-sort (in [[https://gist.github.com/twanvl/5635740][this]] file, line 392)
+  he uses "return", which translates directly into "box"... so we can't just prove anything about
+  running times using return? :P
+** Rewriting the functions
+It turns out I will have to rewrite the functions so they can bookkeep the number of
+comparisons made on their type, as people from Zulip have said. I think it's enough
+to implement, for example Insertion Sort with type =List \alpha -> (List \alpha \times Nat)=, where
+=Nat= is a natural representing the number of operations made.
+
+* Starting the project
