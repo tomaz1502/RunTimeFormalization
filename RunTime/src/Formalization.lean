@@ -9,26 +9,16 @@ local infix ` ≼ ` : 50 := r
 | (b :: l) := if a ≼ b then (a :: b :: l, 1)
                        else let (l', n) := ordered_insert l in (b :: l', n + 1)
 
-theorem ordered_insert_linear (a : α) : ∀ l : list α, (ordered_insert r a l).snd ≤ l.length :=
-begin
-  intros,
-  induction l,
-  { simp, },
-  {}
- end
+@[simp] def insertion_sort : list α → (list α × ℕ)
+| [] := ([], 0)
+| (a :: l) := let (l', n) := (insertion_sort l) , (l'', m) := ordered_insert r a l'
+              in (l'', n + m)
 
 
-
-theorem nineteen_dvd (a : ℤ) : 19 ∣ a ↔ 19 ∣ 4 * a :=
-begin
-  split,
-  { intro h,
-    exact dvd_mul_of_dvd_right h 4
-  },
-  { sorry, }
-
-end
-
-
-theorem nineteen_dvd' (a b : ℤ) : 19 ∣ 100 * a + b ↔ 19 ∣ a + 4 * b :=
-sorry
+-- theorem ordered_insert_linear (a : α) : ∀ l : list α, (ordered_insert r a l).snd ≤ l.length :=
+-- begin
+--   intros,
+--   induction l,
+--   { simp, },
+--   {}
+--  end
