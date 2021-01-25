@@ -111,6 +111,43 @@ Questions (to Haniel)
 It turns out I will have to rewrite the functions so they can bookkeep the number of
 comparisons made on their type, as people from Zulip have said. I think it's enough
 to implement, for example Insertion Sort with type =List \alpha -> (List \alpha \times Nat)=, where
-=Nat= is a natural representing the number of operations made.
+=Nat= is a natural representing the number of operations made. This is the first implementation,
+I will also implement this property as a dependent type, and insertion sort
+as a function from lists to this dependent type (like the tutorial). Also,
+for both implementations I would like to prove that they yield the same list as
+the algorithms from mathlib, so I can use their proof of correctness for sorting
+to prove that my algorithm is also correct.
 
-* Starting the project
+* First Implementation
+Seems a little imprecise... maybe the second approach gives a higher guarantee that we're
+counting correctly. Also, I don't know how to make the proof if I use "let" in
+ordered_insert, in the goal something like =ordered_insert.match b= will appear and
+I don't know how to deal with that... Extracting a function that has =simp=
+makes the proof very easy.
+#+BEGIN_SRC lean
+
+@[simp] def go (b : α) (l : list α × ℕ) : (list α × ℕ) := (b :: l.fst, l.snd + 1)
+
+-- the second value in the output is the number of comparisons made
+@[simp] def ordered_insert (a : α) : list α → (list α × ℕ)
+| [] := ([a], 0)
+| (b :: l) := if a ≼ b then (a :: b :: l, 1)
+                       else go b (ordered_insert l)
+                       -- else let (l', n) := ordered_insert l in (b :: l', n + 1)
+
+theorem ordered_insert_linear (a : α) : ∀ l : list α, (ordered_insert r a l).snd ≤ l.length
+| [] := by simp
+| (b :: l) :=
+begin
+  simp,
+  split_ifs,
+  { simp, },
+  { have ih : (ordered_insert r a l).snd + 1 ≤ l.length + 1 := nat.pred_le_iff.mp (ordered_insert_linear l),
+    refine le_trans _ ih,
+    refine eq.ge _,
+    exact rfl,
+  }
+end
+
+#+END_SRC
+* Second Implementation
