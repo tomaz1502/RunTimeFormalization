@@ -1,9 +1,13 @@
 import data.list.sort
+import data.nat.basic
+
+#check list.ordered_insert
 
 -- Studying how to implement dependent types in lean
 namespace study
 
 variable α : Type
+
 
 inductive fin : ℕ → Type
 | finZero {n : ℕ} : fin (n + 1)
@@ -62,3 +66,24 @@ inductive InsideOf {α : Type} : α → list α → list α → Type
 
 end countingMonad
 
+-- inductive my_even : ℕ → Type
+-- | zeroEven : even 0
+-- | succEven {n : ℕ} : even n → even (n + 2)
+
+
+@[simp] def f (n : ℕ) : ℕ := let m := 2 * n in m
+
+theorem please_help : ∀ n, even (f n) :=
+begin
+  intros,
+  induction n,
+  { use 0,
+    exact rfl,
+  },
+  {
+    rename n_n n',
+    obtain ⟨a, b⟩ := n_ih,
+    simp,
+    use n'.succ,
+  }
+end
