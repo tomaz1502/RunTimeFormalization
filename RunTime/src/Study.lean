@@ -66,11 +66,6 @@ inductive InsideOf {α : Type} : α → list α → list α → Type
 
 end countingMonad
 
--- inductive my_even : ℕ → Type
--- | zeroEven : even 0
--- | succEven {n : ℕ} : even n → even (n + 2)
-
-
 @[simp] def f (n : ℕ) : ℕ := let m := 2 * n in m
 
 theorem please_help : ∀ n, even (f n) :=
@@ -86,4 +81,15 @@ begin
     simp,
     use n'.succ,
   }
+end
+
+def g : ℕ → ℕ
+| 0 := 0
+| (n + 1) := n
+
+lemma l : ∀ x y : ℕ , g x = g y :=
+begin
+  intros,
+  have h : x = 0 := sorry,
+  rw g, bb
 end
