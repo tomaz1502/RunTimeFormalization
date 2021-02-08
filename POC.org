@@ -1,6 +1,8 @@
 #+TITLE: Formalização da Complexidade Temporal de Algoritmos de Ordenação em Lean
 
-* [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/src/Formalization.lean][Main File]]
+* [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/src/InsertionSortDirect.lean][Insertion Sort Direct Proof]]
+
+* [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/src/MergeSortDirect.lean][Merge Sort Direct Proof]]
 
 * [[/home/tomaz1502/Desktop/Tom/Grad/POC/POCII/RunTime/_target/deps/mathlib/src/data/list/sort.lean][Mathlib Code]]
 

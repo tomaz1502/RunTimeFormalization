@@ -37,7 +37,7 @@ namespace counting
 #eval smaller_prefix (λ m n : ℕ , m ≤ n) 5 [6, 3, 2, 0]
 -- 0
 
-theorem ordered_insert_linear (a : α) :
+theorem ordered_insert_complexity (a : α) :
   ∀ l : list α, (ordered_insert r a l).snd ≤ l.length :=
 begin
   intro l,
@@ -110,7 +110,7 @@ begin
   }
 end
 
-theorem insertion_sort_quadratic : ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length :=
+theorem insertion_sort_complexity : ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length :=
 begin
   intro l,
   induction l,
@@ -121,10 +121,9 @@ begin
     cases (insertion_sort r l_tl) with sorted_tl ops,
     unfold insertion_sort,
     have hh : (ordered_insert r l_hd sorted_tl).snd ≤
-       sorted_tl.length := ordered_insert_linear r l_hd sorted_tl,
+       sorted_tl.length := ordered_insert_complexity r l_hd sorted_tl,
     cases (ordered_insert r l_hd sorted_tl),
     unfold insertion_sort,
-
     linarith,
   }
 end
