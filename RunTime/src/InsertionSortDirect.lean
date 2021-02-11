@@ -52,7 +52,7 @@ begin
   }
 end
 
-theorem ordered_insert_identification (a : α) : ∀ l : list α,
+theorem ordered_insert_equivalence (a : α) : ∀ l : list α,
   (ordered_insert r a l).fst = list.ordered_insert r a l :=
 begin
   intro l,
@@ -72,7 +72,7 @@ theorem ordered_insert_length (a : α) : ∀ l : list α,
   (ordered_insert r a l).fst.length = l.length + 1 :=
 begin
   intro l,
-  rw ordered_insert_identification r a l,
+  rw ordered_insert_equivalence r a l,
   exact list.ordered_insert_length r l a,
 end
 
@@ -128,7 +128,7 @@ begin
   }
 end
 
-theorem insertion_sort_identification (a : α) : ∀ l : list α,
+theorem insertion_sort_equivalence (a : α) : ∀ l : list α,
   (insertion_sort r l).fst = list.insertion_sort r l :=
 begin
   intro l,
@@ -138,7 +138,7 @@ begin
     rw ← l_ih,
     cases insertion_sort r l_tl,
     unfold insertion_sort,
-    rw ← ordered_insert_identification r l_hd fst,
+    rw ← ordered_insert_equivalence r l_hd fst,
     cases ordered_insert r l_hd fst,
     unfold insertion_sort,
   }
