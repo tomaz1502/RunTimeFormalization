@@ -32,6 +32,19 @@ begin
   exact ⟨ ih_snd, ih_fst ⟩,
 end
 
+theorem split_complexity : ∀ (l : list α) , (split l).snd.snd = l.length
+| [] := by simp
+| (h :: t) :=
+begin
+  simp,
+  have ih := split_complexity t,
+  cases split t with l₁ l₂n,
+  cases l₂n with l₂ n,
+  unfold split,
+  simp,
+  exact ih,
+end
+
 theorem length_split_lt {a b} {l l₁ l₂ : list α} {n : ℕ} (h : split (a::b::l) = (l₁, l₂, n)) :
   list.length l₁ < list.length (a::b::l) ∧ list.length l₂ < list.length (a::b::l) :=
 begin
@@ -58,6 +71,38 @@ begin
   exact list.length_split_lt reconstruct,
 end
 
+theorem split_halves_length : ∀ {l l₁ l₂ : list α} {n : ℕ} , split l = (l₁, l₂, n) → 
+  2 * list.length l₁ ≤ list.length l + 1 ∧ 2 * list.length l₂ ≤ list.length l
+| [] := begin intros l₁ l₂ n h, unfold split at h, simp at h, cases h with h₁ h₂, cases h₂ with h₂ _, rw ← h₁, rw ← h₂, simp, end
+| (h :: t) :=
+begin
+  intros l₁ l₂ n h',
+  cases e : split t with t₁ t₂m,
+  cases t₂m with t₂ m,
+
+  have split_id : split (h :: t) = (h :: t₂, t₁, m + 1) :=
+  begin
+    simp,
+    cases split t with t₁' t₂',
+    cases t₂' with t₂' m₂,
+    unfold split,
+    injection e,
+    injection h_2,
+    refine congr (congr_arg prod.mk (congr_arg (list.cons h) h_3)) _,
+    rw h_1,
+    rw h_4,
+  end,
+  rw split_id at h',
+  injection h',
+  injection h_2,
+
+  have ih := split_halves_length e,
+  refine and.intro _ _,
+  { rw ← h_1, simp, linarith, },
+  { rw ← h_3, simp, linarith, },
+end
+  
+
 def merge : list α → list α → (list α × ℕ)
 | []       l'        := (l', 0)
 | l        []        := (l,  0)
@@ -74,19 +119,20 @@ def merge_sort : list α → (list α × ℕ)
   cases e : split (a::b::l) with l₁ l₂n,
   cases l₂n with l₂ n,
   cases length_split_lt e with h₁ h₂,
-  cases merge_sort l₁ with l₁' n₁,
-  cases merge_sort l₂ with l₂' n₂,
-  cases merge r l₁' l₂' with l' m,
-  exact (l', m + n₁ + n₂ + n)
+  have ms₁ := merge_sort l₁,
+  have ms₂ := merge_sort l₂,
+  have merged := merge r ms₁.fst ms₂.fst,
+  have split_ops := (split (a::b::l)).snd.snd,
+  exact ( merged.fst , split_ops + ms₁.snd + ms₂.snd + merged.snd),
 end
 using_well_founded {
   rel_tac := λ_ _, `[exact ⟨_, inv_image.wf list.length nat.lt_wf⟩],
   dec_tac := tactic.assumption }
 
 theorem merge_complexity : ∀ l l' : list α , (merge r l l').snd ≤ l.length + l'.length
-| []   []               := begin unfold merge, simp, end
-| []   (h' :: t')       := begin unfold merge, simp, end
-| (h :: t)    []        := begin unfold merge, simp, end
+| []   []               := by { unfold merge, simp }
+| []   (h' :: t')       := by { unfold merge, simp }
+| (h :: t)    []        := by { unfold merge, simp }
 | (h₁ :: t₁) (h₂ :: t₂) :=
 begin
   unfold merge, split_ifs,
@@ -107,9 +153,9 @@ begin
 end
 
 theorem merge_equivalence : ∀ l l' : list α , (merge r l l').fst = list.merge r l l'
-| []       []         := begin unfold merge, unfold list.merge, end
-| []       (h' :: t') := begin unfold merge, unfold list.merge, end
-| (h :: t) []         := begin unfold merge, unfold list.merge, end
+| []       []         := by { unfold merge, unfold list.merge }
+| []       (h' :: t') := by { unfold merge, unfold list.merge }
+| (h :: t) []         := by { unfold merge, unfold list.merge }
 | (h :: t) (h' :: t') :=
 begin
   unfold merge,
@@ -132,8 +178,134 @@ begin
   }
 end
 
-theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ l.length * nat.log 2 l.length := sorry
+theorem merge_sort_cons_cons_fst {a b n} {l l₁ l₂ : list α}
+  (h : split (a::b::l) = (l₁, l₂, n)) :
+  (merge_sort r (a::b::l)).fst = (merge r (merge_sort r l₁).fst (merge_sort r l₂).fst).fst :=
+begin
+  suffices : ∀ (L : list α × ℕ) h1, (@@and.rec
+    (λ a a (_ : list.length l₁ < list.length l + 1 + 1 ∧
+      list.length l₂ < list.length l + 1 + 1), L) h1 h1).fst = L.fst,
+    { simp [merge_sort, h], apply this, },
+  intros, cases h1, refl,
+end
 
-theorem merge_sort_equivalence : ∀ l : list α , (merge_sort r l).fst = list.merge_sort r l := sorry
+theorem merge_sort_cons_cons_snd {a b n} {l l₁ l₂ : list α}
+  (hs : split (a::b::l) = (l₁, l₂, n)) :
+  (merge_sort r (a::b::l)).snd =
+    (split (a::b::l)).snd.snd +
+    (merge_sort r l₁).snd +
+    (merge_sort r l₂).snd +
+    (merge r (merge_sort r l₁).fst (merge_sort r l₂).fst).snd
+  :=
+begin
+  suffices : ∀ (L : list α × ℕ) h1, (@@and.rec
+    (λ a a (_ : list.length l₁ < list.length l + 1 + 1 ∧
+      list.length l₂ < list.length l + 1 + 1), L) h1 h1).snd = L.snd,
+    { simp [merge_sort, hs], apply this, },
+  intros, cases h1, refl,
+end
+
+
+#check le_trans
+
+theorem add_le_right {a b c d : ℕ} : d ≤ b → a + b ≤ c → a + d ≤ c := by omega
+
+
+
+theorem merge_sort_equivalence : ∀ l : list α , (merge_sort r l).fst = list.merge_sort r l
+| []       := by { unfold merge_sort, unfold list.merge_sort }
+| [a]      := by { unfold merge_sort, unfold list.merge_sort }
+| (a₁ :: a₂ :: t) :=
+have (split (a₁ :: a₂ :: t)).fst.length < (a₁ :: a₂ :: t).length :=
+begin
+  cases e : split (a₁ :: a₂ :: t) with l₁ l₂n,
+  cases l₂n with l₂ n,
+  cases length_split_lt e with h₁ h₂,
+  exact h₁,
+end,
+have (split (a₁ :: a₂ :: t)).snd.fst.length < (a₁ :: a₂ :: t).length :=
+begin
+  cases e : split (a₁ :: a₂ :: t) with l₁ l₂n,
+  cases l₂n with l₂ n,
+  cases length_split_lt e with h₁ h₂,
+  exact h₂,
+end,
+begin
+  rw list.merge_sort_cons_cons r (prod.ext rfl rfl),
+  rw merge_sort_cons_cons_fst r (prod.ext rfl (prod.ext rfl rfl)),
+  rw merge_equivalence,
+  rw merge_sort_equivalence,
+  rw merge_sort_equivalence,
+  rw (split_equivalence (a₁ :: a₂ :: t)).left,
+  rw (split_equivalence (a₁ :: a₂ :: t)).right,
+end
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
+
+
+
+theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ l.length * nat.log 2 l.length
+| []  := by { unfold merge_sort, simp }
+| [a] := by { unfold merge_sort, simp }
+| (a₁ :: a₂ :: t) := let l := (a₁ :: a₂ :: t) in
+begin
+  rw merge_sort_cons_cons_snd r (prod.ext rfl (prod.ext rfl rfl)),
+  rw split_complexity,
+
+  cases hs : split l with l₁ l₂n,
+  cases l₂n with l₂ n,
+
+  have l₁_length : 2 * l₁.length ≤ l.length + 1 := (split_halves_length hs).1,
+  have l₂_length : 2 * l₂.length ≤ l.length     := (split_halves_length hs).2,
+
+  have ih₁ := merge_sort_complexity l₁,
+  have ih₂ := merge_sort_complexity l₂,
+
+  cases h₁ : merge_sort r l₁ with l₁s ns,
+  cases h₂ : merge_sort r l₂ with l₂s ms,
+
+  have t_len_l_len : t.length + 2 = l.length := rfl,
+
+  have ns_bound : 2 * ns ≤ t.length + 3 := sorry,
+
+  have ms_bound : 2 * ms ≤ t.length + 2 :=
+  begin
+    rw t_len_l_len,
+    
+    sorry
+  end,
+
+
+  have l₁s_length : l₁s.length ≤ t.length + 1 :=
+  begin
+    have l₁s_id : l₁s = (merge_sort r l₁).fst := by rw h₁,
+    rw l₁s_id,
+    rw merge_sort_equivalence r l₁,
+    rw list.length_merge_sort,
+
+    cases length_split_lt hs with l₁_length _,
+
+    exact nat.lt_succ_iff.mp l₁_length,
+  end,
+
+  have l₂s_length : l₂s.length ≤ t.length + 1 :=
+  begin
+    have l₂s_id : l₂s = (merge_sort r l₂).fst := by rw h₂,
+    rw l₂s_id,
+    rw merge_sort_equivalence r l₂,
+    rw list.length_merge_sort,
+
+    cases length_split_lt hs with _ l₂_length,
+
+    exact nat.lt_succ_iff.mp l₂_length,
+  end,
+
+  simp,
+
+  calc t.length + 1 + 1 + ns + ms + (merge r l₁s l₂s).snd
+           ≤ t.length + 1 + 1 + ns + ms + (l₁s.length + l₂s.length)     : add_le_add_left (merge_complexity r l₁s l₂s) (t.length + 1 + 1 + ns + ms)
+       ... ≤ t.length + 1 + 1 + ns + ms + (t.length + 1 + t.length + 1) : begin refine add_le_add_left _ (t.length + 1 + 1 + ns + ms), rw add_assoc, exact add_le_add l₁s_length l₂s_length, end
+       ... ≤ (t.length + 1 + 1) * nat.log 2 (t.length + 1 + 1)        : sorry
+
+end
 
 end counting
