@@ -264,14 +264,6 @@ begin
   exact bot_le,
 end
 
-theorem something {a b : ℕ} : 2 * a ≤ b → a ≤ b :=
-begin
-  intro h,
-  linarith,
-  -- calc a   ≤ 2 * a : begin linarith end 
-  --      ... ≤ b     : h
-end
-
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ l.length * nat.log 2 l.length
 | []  := by { unfold merge_sort, simp }
 | [a] := by { unfold merge_sort, simp }
@@ -295,20 +287,33 @@ begin
   have t_len_l_len : t.length + 2 = l.length := rfl,
 
   have l₂_length_weak : l₂.length ≤ l.length := by linarith,
+  have l₁_length_weak : l₁.length ≤ l.length := by linarith,
+  have l_length_pos  : 0 < l.length     := by linarith,
+  have l_length_gt_1 : 0 < l.length + 1 := by linarith,
 
   have ms_bound : 2 * ms ≤ (t.length + 2) * nat.log 2 (t.length + 2) :=
   begin
     rw t_len_l_len,
     rw h₂ at ih₂,
     simp at ih₂,
-    have bla : 0 < nat.log 2 l₂.length := begin sorry  end,
-    have bla2 : 0 < l.length := sorry,
     have log_leq := log_monotonic (λ {x y : ℕ} , x ≤ y) l₂_length_weak,
     calc 2 * ms ≤ 2 * (l₂.length * nat.log 2 l₂.length) : (mul_le_mul_left zero_lt_two).mpr ih₂
          ...    = (2 * l₂.length) * nat.log 2 l₂.length : by rw ← mul_assoc 2 l₂.length (nat.log 2 l₂.length)
-         ...    ≤ l.length * nat.log 2 l₂.length        : (mul_le_mul_right bla).mpr l₂_length
-         ...    ≤ l.length * nat.log 2 l.length         : (mul_le_mul_left bla2).mpr log_leq,
-                                                          
+         ...    ≤ l.length * nat.log 2 l₂.length        : by { refine nat.mul_le_mul l₂_length _, exact rfl.ge }
+         ...    ≤ l.length * nat.log 2 l.length         : (mul_le_mul_left l_length_pos).mpr log_leq,
+  end,
+
+  have ns_bound : 2 * ns ≤ (t.length + 3) * nat.log 2 (t.length + 2) :=
+  begin
+    rw t_len_l_len,
+    rw h₁ at ih₁,
+    simp at ih₁,
+    have log_leq := log_monotonic (λ {x y : ℕ} , x ≤ y) l₁_length_weak,
+
+    calc 2 * ns ≤ 2 * (l₁.length * nat.log 2 l₁.length) : (mul_le_mul_left zero_lt_two).mpr ih₁
+         ...    = (2 * l₁.length) * nat.log 2 l₁.length : by rw ← mul_assoc 2 l₁.length (nat.log 2 l₁.length)
+         ...    ≤ (l.length + 1) * nat.log 2 l₁.length  : by { refine nat.mul_le_mul l₁_length _, exact rfl.ge }
+         ...    ≤ (l.length + 1) * nat.log 2 l.length   : (mul_le_mul_left l_length_gt_1).mpr log_leq,
 
   end,
 
