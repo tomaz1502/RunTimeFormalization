@@ -1,13 +1,10 @@
 import data.list.sort tactic
 import data.nat.log
 
-import tactic.monotonicity
-
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
 local infix ` ≼ ` : 50 := r
 
 namespace counting
-
 
 @[simp] def split : list α → (list α × list α × ℕ)
 | []       := ([], [], 0)
@@ -103,7 +100,6 @@ begin
   { rw ← h_1, simp, linarith, },
   { rw ← h_3, simp, linarith, },
 end
-  
 
 def merge : list α → list α → (list α × ℕ)
 | []       l'        := (l', 0)
@@ -207,13 +203,6 @@ begin
   intros, cases h1, refl,
 end
 
-
-#check le_trans
-
-theorem add_le_right {a b c d : ℕ} : d ≤ b → a + b ≤ c → a + d ≤ c := by omega
-
-
-
 theorem merge_sort_equivalence : ∀ l : list α , (merge_sort r l).fst = list.merge_sort r l
 | []       := by { unfold merge_sort, unfold list.merge_sort }
 | [a]      := by { unfold merge_sort, unfold list.merge_sort }
@@ -275,6 +264,14 @@ begin
   exact bot_le,
 end
 
+theorem something {a b : ℕ} : 2 * a ≤ b → a ≤ b :=
+begin
+  intro h,
+  linarith,
+  -- calc a   ≤ 2 * a : begin linarith end 
+  --      ... ≤ b     : h
+end
+
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ l.length * nat.log 2 l.length
 | []  := by { unfold merge_sort, simp }
 | [a] := by { unfold merge_sort, simp }
@@ -297,16 +294,23 @@ begin
 
   have t_len_l_len : t.length + 2 = l.length := rfl,
 
-  -- have ns_bound : 2 * ns ≤ t.length + 3 := sorry,
+  have l₂_length_weak : l₂.length ≤ l.length := by linarith,
 
   have ms_bound : 2 * ms ≤ (t.length + 2) * nat.log 2 (t.length + 2) :=
   begin
     rw t_len_l_len,
     rw h₂ at ih₂,
     simp at ih₂,
-    sorry,
-  end,
+    have bla : 0 < nat.log 2 l₂.length := begin sorry  end,
+    have bla2 : 0 < l.length := sorry,
+    have log_leq := log_monotonic (λ {x y : ℕ} , x ≤ y) l₂_length_weak,
+    calc 2 * ms ≤ 2 * (l₂.length * nat.log 2 l₂.length) : (mul_le_mul_left zero_lt_two).mpr ih₂
+         ...    = (2 * l₂.length) * nat.log 2 l₂.length : by rw ← mul_assoc 2 l₂.length (nat.log 2 l₂.length)
+         ...    ≤ l.length * nat.log 2 l₂.length        : (mul_le_mul_right bla).mpr l₂_length
+         ...    ≤ l.length * nat.log 2 l.length         : (mul_le_mul_left bla2).mpr log_leq,
+                                                          
 
+  end,
 
   have l₁s_length : l₁s.length ≤ t.length + 1 :=
   begin
@@ -337,8 +341,7 @@ begin
   calc t.length + 1 + 1 + ns + ms + (merge r l₁s l₂s).snd
            ≤ t.length + 1 + 1 + ns + ms + (l₁s.length + l₂s.length)     : add_le_add_left (merge_complexity r l₁s l₂s) (t.length + 1 + 1 + ns + ms)
        ... ≤ t.length + 1 + 1 + ns + ms + (t.length + 1 + t.length + 1) : begin refine add_le_add_left _ (t.length + 1 + 1 + ns + ms), rw add_assoc, exact add_le_add l₁s_length l₂s_length, end
-       ... ≤ (t.length + 1 + 1) * nat.log 2 (t.length + 1 + 1)        : sorry
-
+       ... ≤ (t.length + 1 + 1) * nat.log 2 (t.length + 1 + 1)          : sorry
 end
 
 end counting
