@@ -1,6 +1,8 @@
 import data.list.sort tactic
 import data.nat.log
 
+import tactic.monotonicity
+
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
 local infix ` ≼ ` : 50 := r
 
@@ -241,7 +243,37 @@ begin
 end
 using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
 
+theorem log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
+| 0  := begin intros b h, exact bot_le, end
+| (n+1) := have (n + 1) / 2 < n + 1, from nat.div_lt_self' n 0,
+begin
+  intros b h,
+  cases b,
+  { finish, },
 
+  have half_leq : (n + 1) / 2 ≤ (b + 1) / 2 := nat.div_le_div_right h,
+  have ih := log_monotonic half_leq,
+  rw nat.log,
+  split_ifs,
+  { refine ge.le _, rw nat.log, split_ifs,
+    { refine add_le_add (log_monotonic half_leq) _, exact rfl.ge},
+    {
+      have hh := not_and_distrib.mp h_2,
+      simp at hh,
+      cases hh,
+      {
+        have absurd : b.succ < b.succ := calc b.succ < 2      : hh
+                                              ...    ≤ n + 1  : h_1.1
+                                              ...    ≤ b.succ : h,
+        by_contra,
+        exact nat.lt_asymm absurd absurd,
+      },
+      by_contra,
+      exact nat.lt_asymm hh hh,
+    },
+  },
+  exact bot_le,
+end
 
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ l.length * nat.log 2 l.length
 | []  := by { unfold merge_sort, simp }
@@ -265,13 +297,14 @@ begin
 
   have t_len_l_len : t.length + 2 = l.length := rfl,
 
-  have ns_bound : 2 * ns ≤ t.length + 3 := sorry,
+  -- have ns_bound : 2 * ns ≤ t.length + 3 := sorry,
 
-  have ms_bound : 2 * ms ≤ t.length + 2 :=
+  have ms_bound : 2 * ms ≤ (t.length + 2) * nat.log 2 (t.length + 2) :=
   begin
     rw t_len_l_len,
-    
-    sorry
+    rw h₂ at ih₂,
+    simp at ih₂,
+    sorry,
   end,
 
 
