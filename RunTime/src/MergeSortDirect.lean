@@ -309,11 +309,24 @@ begin
   exact bot_le,
 end
 
-theorem split_lengths {l l₁ l₂ : list α} {n : ℕ} : split l = (l₁, l₂, n) → l₁.length + l₂.length = l.length :=
+theorem split_lengths : ∀ (l l₁ l₂ : list α) {n : ℕ}, split l = (l₁, l₂, n) → l₁.length + l₂.length = l.length
+| []  := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
+| [a] := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
+| (a :: b :: t) :=
 begin
-  sorry,
+  intros l₁ l₂ n h,
+  cases e : split t with l₁' l₂'m,
+  cases l₂'m with l₂' m,
+  simp at h,
+  rw e at h,
+  unfold split at h,
+  have ih := split_lengths t l₁' l₂' e,
+  injection h,
+  injection h_2,
+  rw ← h_1,
+  rw ← h_3,
+  simp, linarith,
 end
-
 
 theorem log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
 | 0 := begin simp, rw nat.log, split_ifs, { finish, }, simp, end 
