@@ -329,7 +329,6 @@ begin
   exact nat.lt_asymm h' h',
 end
 
-
 theorem minus (c a b : ℕ) : c - (a + b) = c - a - b :=
 begin
   omega,
@@ -346,8 +345,8 @@ end
 theorem sum_2b (a b : ℕ) : a ≤ 2 * b → a + 2 * b ≤ 4 * b :=
 begin
   intro h,
-  calc a + 2 * b ≤ 2 * b + 2 * b : begin refine add_le_add h _, exact rfl.ge, end
-       ...       = 4 * b : begin linarith, end
+  calc a + 2 * b ≤ 2 * b + 2 * b : by { refine add_le_add h _, exact rfl.ge }
+       ...       = 4 * b : by linarith
 end
 
 theorem log_2_times : ∀ (a : ℕ) , 1 < a → 4 * nat.log 2 a ≤ 2 * a
@@ -355,15 +354,25 @@ theorem log_2_times : ∀ (a : ℕ) , 1 < a → 4 * nat.log 2 a ≤ 2 * a
 | 1 := begin intro h, norm_num at h, end
 | 2 := begin intro h, rw nat.log, split_ifs, { simp, rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
 | 3 := begin intro h, rw nat.log, split_ifs, { rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
-| (a + 4) :=
+| (a + 4) := have (a + 4) / 2 < a + 4 := (a + 3).div_lt_self' 0,
 begin
   intro h,
   have hh : 1 < ((a + 4) / 2) := (cmp_eq_lt_iff 1 ((a + 4) / 2)).mp rfl,
   have ih := log_2_times ((a + 4) / 2) hh,
   
   rw ← log_pred (λ {xx yy : ℕ} , xx ≤ yy) (a + 4) at ih,
-  
-  sorry,
+
+  rw nat.mul_sub_left_distrib 4 (nat.log 2 (a + 4)) 1 at ih,
+  simp at ih,
+
+  have leq_1 : 4 * nat.log 2 (a + 4) ≤ 2 * ((a + 4) / 2) + 4 := nat.le_add_of_sub_le_right ih,
+  have leq_2 : 2 * ((a + 4) / 2) + 4 ≤ 2 * (a + 4) :=
+  begin
+    calc 2 * ((a + 4) / 2) + 4 ≤ a + 4 + 4 : begin rw mul_comm, refine (add_le_add_iff_right 4).mpr _, exact (nat.div_mul_le_self (a + 4) 2), end
+         ...                   ≤ a + a + 4 + 4 : nat.le_add_left (a + 4 + 4) a
+         ...                   = 2 * (a + 4) : by linarith
+  end,
+  exact le_trans leq_1 leq_2,
 end
 
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ 8 * l.length * nat.log 2 l.length
