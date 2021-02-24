@@ -114,20 +114,7 @@ begin
   exact (cmp_eq_lt_iff 1 (2 * n + 2)).mp rfl,
 end
 
-theorem one_not_even : ¬ even 1 :=
-begin
-  intro h,
-  cases h,
-  cases h_w,
-  { simp at h_h,exact h_h, },
-  
-  have h_w_succ_pos : 0 < h_w.succ := fin.last_pos,
-  have h_w_succ_gt_1 : 1 < 2 * h_w.succ := wot h_w.succ h_w_succ_pos,
-  rw ← h_h at h_w_succ_gt_1,
-  exact nat.lt_asymm h_w_succ_gt_1 h_w_succ_gt_1,
-end
-
-theorem div_two : ∀ (b a : ℕ) , 2 * a ≤ b → a ≤ b / 2 
+theorem div_two : ∀ (b a : ℕ) , 2 * a ≤ b → a ≤ b / 2
 | 0       a       := begin intro h, simp, norm_num at h, exact h, end
 | 1       0       := begin intro h, norm_num, end
 | 1       (a + 1) := begin intro h, rw mul_add at h, norm_num at h, linarith,  end
@@ -363,7 +350,7 @@ begin
   have hh : 1 < ((a + 4) / 2) := (cmp_eq_lt_iff 1 ((a + 4) / 2)).mp rfl,
   have ih := log_2_times ((a + 4) / 2) hh,
   
-  rw ← log_pred (λ {xx yy : ℕ} , xx ≤ yy) (a + 4) at ih,
+  rw ← log_pred r (a + 4) at ih,
 
   rw nat.mul_sub_left_distrib 4 (nat.log 2 (a + 4)) 1 at ih,
   simp at ih,
@@ -393,7 +380,6 @@ begin
   cases length_split_lt hs with hh₁ hh₂,
 
   have l₁_length : 2 * l₁.length ≤ l.length + 1 := (split_halves_length hs).1,
-  have l₁_length_half : l₁.length ≤ (l.length + 1) / 2 := div_two (l.length + 1) l₁.length l₁_length,
   have l₂_length : 2 * l₂.length ≤ l.length     := (split_halves_length hs).2,
   have l₂_length_half : l₂.length ≤ l.length / 2 := div_two l.length l₂.length l₂_length,
 
@@ -405,7 +391,6 @@ begin
 
   have t_len_l_len : t.length + 2 = l.length := rfl,
 
-  have l₂_length_weak : l₂.length ≤ l.length := by linarith,
   have l₁_length_weak : l₁.length ≤ l.length := by linarith,
   have one_lt_l_length : 1 < l.length   := by linarith,
   have l_length_pos  : 0 < l.length     := by linarith,
@@ -470,8 +455,8 @@ begin
 
   have log_l_length : 1 ≤ nat.log 2 l.length :=
   begin
-    calc 1 = nat.log 2 2 : (log_2_val (λ {xx yy : ℕ} , xx ≤ yy)).symm
-         ... ≤ nat.log 2 l.length : begin refine log_monotonic (λ {xx yy : ℕ} , xx ≤ yy) _, linarith, end
+    calc 1 = nat.log 2 2 : (log_2_val r).symm
+         ... ≤ nat.log 2 l.length : begin refine log_monotonic r _, linarith, end
   end,
 
   have four_log_l_length : 4 * 1 * l.length ≤ 4 * nat.log 2 l.length * l.length :=
@@ -517,8 +502,8 @@ begin
                                                      rw add_assoc,
                                                      refine (add_le_add_iff_left (8 * nat.log 2 l.length * l.length)).mpr _,
 
-                                                     refine sum_2b (λ {xx yy : ℕ} , xx ≤ yy) (4 * nat.log 2 l.length) l.length _,
-                                                     exact log_2_times (λ {xx yy : ℕ}, xx ≤ yy) l.length one_lt_l_length,
+                                                     refine sum_2b r (4 * nat.log 2 l.length) l.length _,
+                                                     exact log_2_times r l.length one_lt_l_length,
                                                     end
 end
 using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
