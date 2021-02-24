@@ -104,13 +104,6 @@ begin
   { rw ← h_3, simp, linarith, },
 end
 
-theorem zero_not_odd : ¬ odd 0 :=
-begin
-  intro h,
-  cases h,
-  finish,
-end
-
 theorem wot : ∀ n : ℕ , 0 < n →  1 < 2 * n
 | 0 := begin intro h', by_contra, exact nat.lt_asymm h' h', end
 | (n + 1) := 
@@ -134,16 +127,18 @@ begin
   exact nat.lt_asymm h_w_succ_gt_1 h_w_succ_gt_1,
 end
 
-theorem div_two : ∀ (b a : ℕ) , 2 * a = b → a = b / 2 
-| 0       a       := begin intro h, simp, exact easy_eq h, end
-| 1       a       := begin intro h, have q : even 1 := begin use a, exact h.symm end, by_contra, exact one_not_even q, end
-| (b + 2) 0       := begin intro h, finish, end
+theorem div_two : ∀ (b a : ℕ) , 2 * a ≤ b → a ≤ b / 2 
+| 0       a       := begin intro h, simp, norm_num at h, exact h, end
+| 1       0       := begin intro h, norm_num, end
+| 1       (a + 1) := begin intro h, rw mul_add at h, norm_num at h, linarith,  end
+| (b + 2) 0       := begin intro h, exact bot_le, end
 | (b + 2) (a + 1) :=
 begin
   intros h,
-  have q : a = b / 2 := begin refine div_two b a _, rw mul_add at h, simp at h, exact h, end,
-  rw q,
-  ring,
+  have q : a ≤ b / 2 := begin refine div_two b a _, rw mul_add at h, simp at h, exact h, end,
+
+  calc a + 1 ≤ b / 2 + 1   : by { refine add_le_add q _, exact rfl.ge }
+       ...   ≤ (b + 2) / 2 : rfl.ge
 end
 
 def merge : list α → list α → (list α × ℕ)
@@ -342,11 +337,6 @@ begin
   exact nat.lt_asymm h' h',
 end
 
-theorem minus (c a b : ℕ) : c - (a + b) = c - a - b :=
-begin
-  omega,
-end
-
 theorem log_2_val : nat.log 2 2 = 1 :=
 begin
   rw nat.log,
@@ -391,7 +381,8 @@ end
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ 8 * l.length * nat.log 2 l.length
 | []  := by { unfold merge_sort, simp }
 | [a] := by { unfold merge_sort, simp }
-| (a₁ :: a₂ :: t) := let l := (a₁ :: a₂ :: t) in
+| (a₁ :: a₂ :: t) :=
+let l := (a₁ :: a₂ :: t) in
 begin
   rw merge_sort_cons_cons_snd r (prod.ext rfl (prod.ext rfl rfl)),
   rw split_complexity,
@@ -399,8 +390,12 @@ begin
   cases hs : split l with l₁ l₂n,
   cases l₂n with l₂ n,
 
+  cases length_split_lt hs with hh₁ hh₂,
+
   have l₁_length : 2 * l₁.length ≤ l.length + 1 := (split_halves_length hs).1,
+  have l₁_length_half : l₁.length ≤ (l.length + 1) / 2 := div_two (l.length + 1) l₁.length l₁_length,
   have l₂_length : 2 * l₂.length ≤ l.length     := (split_halves_length hs).2,
+  have l₂_length_half : l₂.length ≤ l.length / 2 := div_two l.length l₂.length l₂_length,
 
   have ih₁ := merge_sort_complexity l₁,
   have ih₂ := merge_sort_complexity l₂,
@@ -418,56 +413,57 @@ begin
 
   have ms_bound : ms ≤ 4 * l.length * (nat.log 2 l.length - 1) :=
   begin
-    sorry,
-    -- rw h₂ at ih₂,
-    -- simp at ih₂,
-    -- have log_leq := log_monotonic (λ {x y : ℕ} , x ≤ y) l₂_length_weak,
-    -- calc 2 * ms ≤ 2 * (l₂.length * nat.log 2 l₂.length) : -- (mul_le_mul_left zero_lt_two).mpr ih₂
-    --      ...    = (2 * l₂.length) * nat.log 2 l₂.length : by rw ← mul_assoc 2 l₂.length (nat.log 2 l₂.length)
-    --      ...    ≤ l.length * nat.log 2 l₂.length        : by { refine nat.mul_le_mul l₂_length _, exact rfl.ge }
-    --      ...    ≤ l.length * nat.log 2 l.length         : (mul_le_mul_left l_length_pos).mpr log_leq,
+    have ms_id : (merge_sort r l₂).snd = ms := (congr_arg prod.snd h₂).trans rfl,
+    rw ← ms_id,
+    refine le_trans ih₂ _,
+    rw log_pred r l.length,
+    calc 8 * l₂.length * nat.log 2 l₂.length
+                = 4 * (2 * l₂.length) * nat.log 2 l₂.length : by linarith
+            ... ≤ 4 * l.length * nat.log 2 l₂.length : begin rw mul_assoc, rw mul_assoc 4 l.length (nat.log 2 l₂.length),
+                                                             refine (mul_le_mul_left zero_lt_four).mpr _,
+                                                             exact nat.mul_le_mul_right (nat.log 2 l₂.length) l₂_length,
+                                                       end
+            ... ≤ 4 * l.length * nat.log 2 (l.length / 2) : begin refine nat.mul_le_mul_left (4 * l.length) _, exact log_monotonic r l₂_length_half, end
   end,
 
   have ns_bound : ns ≤ 4 * (l.length + 1) * nat.log 2 l.length :=
   begin
-    sorry,
-    -- rw t_len_l_len,
-    -- rw h₁ at ih₁,
-    -- simp at ih₁,
-    -- have log_leq := log_monotonic (λ {x y : ℕ} , x ≤ y) l₁_length_weak,
-
-    -- calc 2 * ns ≤ 2 * (l₁.length * nat.log 2 l₁.length) :  -- (mul_le_mul_left zero_lt_two).mpr ih₁
-    --      ...    = (2 * l₁.length) * nat.log 2 l₁.length : by rw ← mul_assoc 2 l₁.length (nat.log 2 l₁.length)
-    --      ...    ≤ (l.length + 1) * nat.log 2 l₁.length  : by { refine nat.mul_le_mul l₁_length _, exact rfl.ge }
-    --      ...    ≤ (l.length + 1) * nat.log 2 l.length   : (mul_le_mul_left l_length_gt_1).mpr log_leq,
-
+    have ns_id : (merge_sort r l₁).snd = ns := (congr_arg prod.snd h₁).trans rfl,
+    rw ← ns_id,
+    refine le_trans ih₁ _,
+    calc 8 * l₁.length * nat.log 2 l₁.length
+                = 4 * (2 * l₁.length) * nat.log 2 l₁.length : by linarith
+            ... ≤ 4 * (l.length + 1) * nat.log 2 l₁.length : begin rw mul_assoc, rw mul_assoc 4 (l.length + 1) (nat.log 2 l₁.length),
+                                                                   refine (mul_le_mul_left zero_lt_four).mpr _,
+                                                                   exact nat.mul_le_mul_right (nat.log 2 l₁.length) l₁_length,
+                                                             end
+            ... ≤ 4 * (l.length + 1) * nat.log 2 l.length : begin refine nat.mul_le_mul_left (4 * (l.length + 1)) _, exact log_monotonic r l₁_length_weak, end
   end,
 
-  have split_length : l₁s.length + l₂s.length = l.length := sorry,
+  have split_length : l₁s.length + l₂s.length = l.length :=
+  begin
+    have l₁s_id : (merge_sort r l₁).fst = l₁s := (congr_arg prod.fst h₁).trans rfl,
+    rw merge_sort_equivalence at l₁s_id,
+    have same_lengths₁ := list.length_merge_sort r l₁,
+    have l₁s_len_l₁_len : l₁s.length = l₁.length :=
+    begin
+      rw l₁s_id at same_lengths₁,
+      exact same_lengths₁,
+    end,
 
-  -- have l₁s_length : l₁s.length ≤ t.length + 1 :=
-  -- begin
-  --   have l₁s_id : l₁s = (merge_sort r l₁).fst := by rw h₁,
-  --   rw l₁s_id,
-  --   rw merge_sort_equivalence r l₁,
-  --   rw list.length_merge_sort,
+    have l₂s_id : (merge_sort r l₂).fst = l₂s := (congr_arg prod.fst h₂).trans rfl,
+    rw merge_sort_equivalence at l₂s_id,
+    have same_lengths₂ := list.length_merge_sort r l₂,
+    have l₂s_len_l₂_len : l₂s.length = l₂.length :=
+    begin
+      rw l₂s_id at same_lengths₂,
+      exact same_lengths₂,
+    end,
+    rw l₁s_len_l₁_len,
+    rw l₂s_len_l₂_len,
 
-  --   cases length_split_lt hs with l₁_length _,
-
-  --   exact nat.lt_succ_iff.mp l₁_length,
-  -- end,
-
-  -- have l₂s_length : l₂s.length ≤ t.length + 1 :=
-  -- begin
-  --   have l₂s_id : l₂s = (merge_sort r l₂).fst := by rw h₂,
-  --   rw l₂s_id,
-  --   rw merge_sort_equivalence r l₂,
-  --   rw list.length_merge_sort,
-
-  --   cases length_split_lt hs with _ l₂_length,
-
-  --   exact nat.lt_succ_iff.mp l₂_length,
-  -- end,
+    exact split_lengths r l l₁ l₂ hs,
+  end,
 
   simp,
   rw t_len_l_len,
@@ -475,7 +471,7 @@ begin
   have log_l_length : 1 ≤ nat.log 2 l.length :=
   begin
     calc 1 = nat.log 2 2 : (log_2_val (λ {xx yy : ℕ} , xx ≤ yy)).symm
-         ... ≤ nat.log 2 l.length : begin  refine log_monotonic (λ {xx yy : ℕ} , xx ≤ yy) _, linarith, end
+         ... ≤ nat.log 2 l.length : begin refine log_monotonic (λ {xx yy : ℕ} , xx ≤ yy) _, linarith, end
   end,
 
   have four_log_l_length : 4 * 1 * l.length ≤ 4 * nat.log 2 l.length * l.length :=
@@ -525,5 +521,6 @@ begin
                                                      exact log_2_times (λ {xx yy : ℕ}, xx ≤ yy) l.length one_lt_l_length,
                                                     end
 end
+using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
 
 end counting
