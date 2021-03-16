@@ -1,0 +1,666 @@
+\documentclass[12pt, oneside, a4paper,english,brazil]{abntex2}
+
+\usepackage[utf8]{inputenc} % Codificação do documento (conversão automática
+                            % dos acentos)
+\usepackage{lmodern} % Usa a fonte Latin Modern
+\usepackage[T1]{fontenc} % Seleção de códigos de fonte.
+\usepackage{lastpage} % Usado pela Ficha catalográfica
+\usepackage{indentfirst} % Indenta o primeiro parágrafo de cada seção.
+\usepackage{color} % Controle das cores
+\usepackage{graphicx,url}
+\usepackage{microtype} % para melhorias de justificação
+\usepackage{longtable}
+\usepackage[super]{nth}
+\usepackage[num]{abntex2cite}
+\usepackage{hyperref}
+\usepackage{amsfonts}
+\usepackage{minted}
+\usepackage{proof}
+\usepackage{amsmath,amsfonts,amsthm,bm}
+
+\DeclareUnicodeCharacter{2200}{$\mathbb{\forall}$}
+\DeclareUnicodeCharacter{227C}{$\preceq$}
+\DeclareUnicodeCharacter{03B1}{$\alpha$}
+\DeclareUnicodeCharacter{2115}{$\mathbb{N}$}
+\DeclareUnicodeCharacter{03BB}{$\lambda$}
+\DeclareUnicodeCharacter{2081}{$_1$}
+\DeclareUnicodeCharacter{2082}{$_2$}
+
+\titulo
+  {Formalização da Complexidade Temporal de Algoritmos de Ordenação em Lean}
+\autor{Tomaz Gomes Mascarenhas}
+\local{Belo Horizonte, Minas Gerais}
+\data{2020}
+\orientador{Haniel Barbosa}
+\instituicao{%
+Universidade Federal de Minas Gerais
+\par Instituto de Ciências Exatas
+\par Departamento de Ciência da Computação}
+\tipotrabalho{Projeto Orientado em Computação}
+
+% \preambulo{Proposta de Pesquisa Científica}
+
+\begin{document}
+
+\imprimircapa
+\imprimirfolhaderosto
+
+\tableofcontents* %\sumario %comando que gera o sumário automaticamente
+
+\textual
+
+\chapter{Introdução}
+\section{Hist\'oria}
+
+\subsection*{Teoria dos Tipos}
+
+\qquad Em 1901, o matemático Bertrand Russell descobriu uma contradição lógica nos
+fundamentos da teoria dos conjuntos, a qual formava a base da matemática naquela época.
+Essa descoberta veio da observação de que, como não existem limitações para o conteúdo
+de um conjunto, nada o impede de conter a si mesmo. De fato, o conjunto de todas as
+ideias é uma ideia, e deve estar contido em si mesmo, por exemplo. Desse modo, é possível
+separar os conjuntos em duas categorias: aqueles que contém e aqueles que não contém a
+si próprios. Formalmente, denotando por $U$ o conjunto de todos os conjuntos, teríamos:
+
+\begin{center}
+  $M = \{A\, |\, A\, \in A\}$ \\
+  $N = \{A\, |\, A\, \notin A\}$ \\
+  $U = M\, \dot\cup\, N$
+\end{center}
+
+\qquad Dessa definição surge uma dúvida: $N$ contém a si próprio? Se ele não contiver,
+então, sua definição implicaria que ele deveria se conter. Por outro lado, se $N \in N$ , ele
+estaria contrariando sua definição, já que $N$ só aceita conjuntos que não contém a si
+mesmos. Em ambos os casos, temos uma contradição. Esse é um dos exemplos mais
+famosos de impredicatividade, isto é, um objeto que referencia a si mesmo.
+
+\qquad Como uma resposta para esse problema, Russell criou o campo que ficou conhecido
+como Teoria dos Tipos. A ideia central era dividir os conjuntos em classes, que seriam
+representadas por números naturais, e estabelecer regras que tornem impossível um
+conjunto conter a si próprio. A classe de número $0$ representa todos os conjuntos que
+não possuem conjuntos como elementos. A classe $1$ se referia a todos os conjuntos que,
+se possuírem conjuntos como elementos, estes deverão pertencer a classe $0$. De modo
+geral, conjuntos da classe $i$ só podem conter conjuntos de classes $j$, tal que $j < i$. Desse
+modo, não podem existir conjuntos que contém a si próprios, e o paradoxo deixa de existir.
+Embora tenha resolvido esse problema, a teoria é menos expressiva do que sua antecessora,
+o que fez com que não fosse amplamente adotada pelos matemáticos.
+
+\qquad Contudo, com o surgimento da Ciência da Computação, as ideias da Teoria dos Tipos
+encontraram uma nova aplicação nas Linguagens de Programação. A maioria delas adota
+algo que é conhecido como Sistema de Tipos. Nas palavras de Pierce\cite{pierce}, ``Um sistema de
+tipos é um método sintático tratável para demonstrar a isenção de certos comportamentos
+em um programa por meio da classificação de frases de acordo com as espécies de valores
+que elas computam''. Por exemplo, sem um sistema desses, a expressão ``word''+2 poderia
+ser considerada válida em uma linguagem, embora não esteja claro o que ela quer dizer.
+Atribuindo ao objeto ``word'' o tipo String, ao objeto $2$ o tipo Integer e ao operador
+$+$ a propriedade de que deve ser usado com objetos de mesmo tipo, por exemplo, é
+possível identificar essa expressão como inválida, ainda em tempo de compilação (note a
+semelhança entre essas restrições relacionadas a termos e as restrições estabelecidas por
+Russell, relacionadas a conjuntos).
+
+\qquad Embora esse exemplo possa parecer trivial, em softwares grandes e com relações
+complexas entre classes podem surgir problemas muito mais sutis e que não se manifestariam
+imediatamente na execução.
+
+\subsection*{Isomorfismo de Curry-Howard}
+\qquad Em meados do século XX, foi descoberto que os Sistemas de Tipos possuíam uma
+relação muito profunda com a lógica. Considere, por exemplo, uma função $f : A \rightarrow B$
+sendo $A$ e $B$ tipos quaisquer. Uma regra clássica dos sistemas de tipo é algo como:
+
+\begin{center}
+  $\infer{f(a) : B}{f : A \rightarrow B & a : A}$
+\end{center}
+
+\qquad Ou seja, se $f$ é uma função de $A$ para $B$ e $a$ é um objeto do tipo $A$, então aplicar
+$f$ em $a$ produz algo do tipo $B$. Na lógica proposicional existe uma regra de inferência
+semelhante a isso. Se $P$ e $Q$ são proposições e $P \rightarrow Q$ denota que a proposição $P$ implica
+em $Q$, a regra chamada Modus Ponens estabelece a seguinte relação:
+
+\begin{center}
+  $\infer{Q}{P \rightarrow Q & P}$
+\end{center}
+
+\qquad Se possuímos uma demonstração de que a proposição $P$ é verdadeira e que $P$
+implica em $Q$, então podemos usar essa regra para concluir que $Q$ é verdadeiro.
+
+\qquad De fato, esses dois sistemas não são apenas semelhantes, mas equivalentes. Note
+que a única diferença entre as duas regras é a natureza dos objetos aos quais elas se referem.
+Se identificarmos proposições como tipos e demonstrações como termos de um determinado
+tipo, então não existe diferença entre elas. Podemos interpretar a proposição $P \rightarrow Q$ como
+o tipo das funções que levam demonstrações de $P$ em demonstrações de $Q$.
+
+\qquad Um isomorfismo entre duas categorias de objetos matemáticos é um mapeamento
+entre objetos da primeira categoria e os da segunda, preservando suas propriedades.
+Essa correspondência recebeu o nome Isomorfismo de Curry-Howard, em homenagem
+aos pesquisadores que a descobriram. Cada elemento da lógica corresponde a alguma
+construção nas linguagens de programação. Alguns exemplos são:
+\begin{table}[H]
+  \centering
+    \begin{tabular}{cc}\toprule
+      Versão em Lógica & Versão em Programação  \\\midrule
+      Proposição & Tipo \\
+      Demonstração & Termo do tipo correspondente \\
+      Indução & Recursão \\
+      Conjunção & Produto de tipos \\
+      Disjunção & União de tipos \\
+      Implicação & Função \\
+      Negação & Função para um tipo vazio \\\bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection*{Assistentes de Demonstra\c{c}\~ao}
+\qquad Essa equivalência contribuiu para a cria\c{c}\~ao dos \textbf{Assistentes de Demonstra\c{c}\~ao}. Estes
+são sistemas que dão suporte a certas linguagens de programação, fazendo com que elas
+concretizem essa correspondência e seja possível usá-las para demonstrar teoremas por
+meio da escrita de programas. Tais demonstrações podem ser verificadas mecanicamente
+pelo compilador da linguagem, fazendo com que o grau de confiabilidade que elas atinjam
+seja muito superior ao de demonstrações convencionais.
+
+\qquad De acordo com Geuvers\cite{geuvers} (p. 4): ``Uma demonstração matemática pode ser
+reduzida a uma série de etapas muito breves que podem ser verificadas de forma sim-
+ples e irrefutável''. Tais etapas são tão pequenas que quase sempre são resumidas em
+demonstrações, e sua corretude fica subentendida. No entanto, é possível que esse resumo
+omita alguma falha lógica, invalidando toda a demonstração de uma forma difícil de ser
+detectada, como j\'a aconteceu diversas vezes na hist\'oria da matem\'atica.
+
+\qquad Ao usar um assistente, não é possível omitir tais partes da demonstração dessa
+maneira, tornando sua escrita mais trabalhosa. Contudo, ele verifica cada passo da dedução
+e o valida, tornando impossível que erros lógicos sejam aceitos. Por causa do isomorfismo
+de Curry-Howard, o compilador é capaz de tratar cada passo lógico como a aplicação de
+uma função de um certo tipo, assim, caso exista uma inconsistência no argumento usado
+ele será capaz de identificar uma inconsistência entre os tipos dos objetos, resultando em
+um erro de compilação.
+
+\section{Aplica\c{c}\~oes}
+
+\qquad Talvez o caso mais famoso de aplicação dos assistentes seja a demonstração do
+Teorema das Quatro Cores. Tal teorema afirma que, dado qualquer mapa plano, dividido
+em regiões, sempre é possível pintá-lo com no máximo quatro cores, de modo que duas
+regiões vizinhas nunca possuam a mesma cor. Esse fato foi conjecturado pelo matemático
+Francis Guthrie em 1852 e permaneceu por mais de 100 anos sem ser demonstrado, até
+que em 1976, sua veracidade foi verificada, com a ajuda de um computador IBM 360. A
+demonstração consistia em reduzir todos os mapas possíveis em 1936 configurações, de
+modo que para demonstrar o teorema bastaria verificar uma por uma delas e garantir que
+nunca são necessárias mais do que quatro cores para pintá-las. A única possibilidade de
+realizar tal tarefa foi por meio da ajuda de computadores, e, mesmo os mais eficazes da
+época levaram mais de mil horas para isso. O uso desse tipo de técnica foi questionado por
+parte da comunidade matemática, principalmente pelo fato de ser necessário acreditar que
+os softwares utilizados para colorir e gerar os mapas estariam corretos. Anos depois, em
+2005, a demonstração foi formalizada dentro de um assistente de demonstra\c{c}\~ao chamado Coq, fazendo com
+que fosse necessário acreditar apenas que seu kernel estaria correto. Exitem divergências
+quanto ao uso desse tipo de demonstração na matemática, mas a comunidade no geral
+tem se mostrado confiante nessa ferramenta. Por exemplo, 29 participantes de um evento
+relacionado a um assistente chamado Lean se identificaram como matemáticos\cite{hitchhiker} (p. 8).
+
+\qquad Um outro campo que também tem se beneficiado desse mecanismo é a Engenharia
+de Software. Uma das propriedades mais desejáveis quando se desenvolve programas é a
+corretude, ou seja, a garantia de que, para qualquer entrada que receba, o software irá
+respeitar alguma especificação fornecida previamente. Usando linguagens com suporte a
+assistentes, é possível escrever funções, demonstrar sua corretude formalmente e exportá-la
+para uma outra linguagem mais usual, garantindo sua corretude. Em softwares de miss\~ao cr\'itica,
+esse tipo de prática pode evitar prejuízos catastróficos.
+
+\section{Contexto}
+
+\qquad O objetivo deste trabalho \'e usar Lean, um dos assistentes de demonstra\c{c}\~ao
+mais relevantes atualmente, para formalizar algum conceito que ainda n\~ao tenha sido
+amplamente explorado no contexto dos assistentes e que seja relevante para a comunidade.
+De acordo com membros ativos da comunidade  que
+utiliza
+Lean\footnote{\url{https://leanprover.zulipchat.com/\#narrow/stream/113488-general/topic/BSc.20Final.20Project}}, a complexidade temporal de algoritmos é um conceito relevante que
+ainda não foi formalizado em nenhum módulo de sua biblioteca de formaliza\c{c}\~oes.
+Em particular, a complexidade temporal de algoritmos básicos de ordenação, que poderia ser
+formalizada sem usar técnicas muito avançadas. Assim, o escopo do trabalho será
+a demonstração de um limite, com base no tamanho da entrada, para o número de
+operações feitas pelos algoritmos Insertion Sort e Merge Sort, implementados na
+biblioteca do
+Lean\footnote{\url{https://github.com/leanprover-community/mathlib/blob/master/src/data/list/sort.lean}}.
+
+\qquad Na se\c{c}\~ao 2, apresentamos os conceitos b\'asicos que s\~ao abordados por este trabalho.
+Na se\c{c}\~ao 3, definimos matematicamente
+os algoritmos que ser\~ao formalizados. Em seguida, na se\c{c}\~ao 4 apresentamos
+demonstra\c{c}\~oes convencionais dos principais teoremas que est\~ao no escopo
+do trabalho, usando as defini\c{c}\~oes da se\c{c}\~ao anterior. Finalmente,
+na se\c{c}\~ao 5, mostramos a implementa\c{c}\~ao em Lean dos algoritmos e dos teoremas,
+junto com as principais ideias necess\'arias para escrever suas demonstra\c{c}\~oes
+no assistente.
+
+\chapter{Conceitos B\'asicos}
+\section{Algoritmos de Ordena\c{c}\~ao}
+\qquad Um algoritmo de ordena\c{c}\~ao \'e um m\'etodo que recebe como entrada uma lista de objetos
+compar\'aveis e retorna uma permuta\c{c}\~ao da lista, na qual os objetos est\~ao ordenados. Formalmente,
+para um m\'etodo $f :: [A] \rightarrow [A]$ ser considerado um algoritmo de ordena\c{c}\~ao correto, ele deve
+satisfazer, para qualquer lista $xs$:
+
+\begin{itemize}
+  \item $[f(xs)]_{i} \le [f(xs)]_{j}$, sempre que $i \le j$.
+  \item $count(x, xs) = count(x, f(xs)) ,  \forall x \in xs$. Nesse caso, $count(y, ys)$ \'e a fun\c{c}\~ao
+        que conta o n\'umero de ocorr\^encias do objeto $y$ na lista $ys$.
+\end{itemize}
+
+\qquad Os seguintes exemplos mostram sa\'idas corretas, considerando o problema da ordena\c{c}\~ao, para a
+entrada indicada:
+
+\begin{itemize}
+  \item Entrada: $[9, 7, 10, 2, 4]$, Sa\'ida: $[2, 4, 7, 9, 10]$
+  \item Entrada: $[1, 2, 1, 3]$, Sa\'ida: $[1, 1, 2, 3]$
+\end{itemize}
+
+\qquad Por outro lado, o seguinte exemplo mostra um resultado incorreto, j\'a que temos duas ocorr\^encias
+do n\'umero $2$ na lista de entrada, e apenas uma na lista de sa\'ida.
+
+\begin{itemize}
+  \item Entrada: $[2, 2, 4, 1]$, Sa\'ida: $[1, 2, 4]$
+\end{itemize}
+
+\qquad Existem diversos algoritmos de ordena\c{c}\~ao conhecidos. Esse trabalho ir\'a se restringir ao
+Insertion Sort e o Merge Sort\cite{1}. Essa escolha foi feita por causa de restri\c{c}\~oes de tempo para
+o trabalho, e pelo fato de, esses dois serem os \'unicos algoritmos de ordena\c{c}\~ao
+formalizados pela biblioteca do Lean, o que os torna os mais interessantes do ponto de vista
+da comunidade do assistente.
+
+\section{Complexidade Temporal}
+
+\qquad Se forem analisados como fun\c{c}\~oes matem\'aticas, todos os algoritmos de ordena\c{c}\~ao corretos
+s\~ao equivalentes. Contudo, do ponto de vista computacional eles podem se diferenciar no tempo necess\'ario
+para resolver o problema da ordena\c{c}\~ao.
+
+\qquad Para que se possa avaliar formalmente a efici\^encia de um algoritmo, deve-se definir uma m\'etrica
+que associe a execu\c{c}\~ao dele em uma entrada a um n\'umero natural, tal que este esteja associado \`a
+quantidade de instru\c{c}\~oes que um computador teria que executar para realizar aquele algoritmo naquela
+entrada. A m\'etrica mais comum para algoritmos de ordena\c{c}\~ao \'e o n\'umero de compara\c{c}\~oes feitas
+entre os elementos da lista que ele est\'a ordenando.
+
+\qquad Uma vez que a m\'etrica foi explicitada, deve-se encontrar alguma rela\c{c}\~ao entre o seu valor para
+uma entrada espec\'ifica e o tamanho daquela entrada. Por exemplo, no caso dos algoritmos de ordena\c{c}\~ao
+iremos comparar o n\'umero de compara\c{c}\~oes executadas com o n\'umero de elementos da lista de entrada.
+Ser\'a demonstrado que, para uma lista de tamanho $n$, o Insertion Sort nunca utiliza mais do que $n^{2}$ compara\c{c}\~oes, enquanto o Merge Sort n\~ao passa de $8 n \log (n)$. Esses dois fatos,
+juntos com exemplos em que os algoritmos atingem esses limites, mostram que o Merge Sort \'e mais eficiente
+do que o Insertion Sort.
+
+\qquad Na literatura, existem demonstra\c{c}\~oes de que o Merge Sort utiliza menos do que $n\log(n)$
+compara\c{c}\~oes no pior caso\cite{1}, o que \'e um limite mais forte do que o apresentado neste trabalho. Contudo, na literatura \'e considerada uma implementa\c{c}\~ao que usa um vetor em vez de uma lista,
+fazendo com que n\~ao seja necess\'ario usar opera\c{c}\~oes para dividir a lista em duas. No caso do Insertion Sort, sabe-se que ele nunca faz mais do
+que $n(n - 1) / 2$ compara\c{c}\~oes, o que \'e um limite um pouco mais forte
+do que o deste trabalho.
+
+
+
+% \qquad Na literatura, usualmente utiliza-se a nota\c{c}\~ao $\mathcal{O}$ para formalizar esses conceitos.
+% \'E sabido que o n\'umero de compara\c{c}\~oes do Insertion Sort est\'a em
+% $\mathcal{O}(n^{2})$ e o do Merge Sort est\'a em $\mathcal{O}(n\log(n))$, considerando listas de tamanho $n$.
+% Isso significa que, existem constantes $c_{1}$ e $c_{2}$ tais que o primeiro n\'umero \'e sempre menor que
+% $c_{1}n^{2}$ e o segundo \'e sempre menor que $c_{2}n\log(n)$. Nesse sentido, os resultados obtidos neste
+% trabalho concordam com a literatura, al\'em de apresentarem limites mais precisos.
+
+\section{Polimorfismo Param\'etrico}
+
+\qquad Existem diversas linguagens de programa\c{c}\~ao que suportam polimorfismo sobre seus tipos. Isso
+significa que \'e poss\'ivel definir fun\c{c}\~oes sem fixar concretamente alguns dos tipos sobre a qual elas
+agem, fazendo com que se possa us\'a-las em objetos de qualquer tipo. Al\'em disso, algumas linguagens
+aceitam que, nessa fun\c{c}\~oes, se restrinja os tipos aceitos \`aqueles que possuam alguma propriedade.
+Esta \'e uma varia\c{c}\~ao do polimorfismo, conhecido como polimorfismo param\'etrico.
+
+\qquad Como foi mencionado no in\'icio dessa se\c{c}\~ao, os algoritmos de ordena\c{c}\~ao que estamos
+considerando agem sobre listas de objetos de qualquer tipo, desde que seja poss\'ivel comparar elementos
+desse tipo. Para expressar essa restri\c{c}\~ao nas linguagens de programa\c{c}\~ao, usa-se o polimorfismo
+param\'etrico, restringindo os tipos aceitos \`aqueles que implementam alguma fun\c{c}\~ao que compare
+elementos daquele tipo. Para que o algoritmo funcione corretamente, essa fun\c{c}\~ao deve induzir uma ordem
+total sobre o tipo. Isso significa que, se a fun\c{c}\~ao de compara\c{c}\~ao sobre um tipo $T$ \'e definida
+pelo operador bin\'ario ``$\le$'', as seguintes propriedades devem valer:
+
+\begin{itemize}
+  \item $\forall t : T, t \le t$
+  \item $\forall t_{1}, t_{2} : T, t_{1} \le t_{2} \wedge t_{2} \le t_{1} \leftrightarrow t_{1} = t_{2}$
+  \item $\forall t_{1}, t_{2}, t_{3} : T, t_{1} \le t_{2} \wedge t_{2} \le t_{3} \rightarrow t_{1} \le t_{3}$
+\end{itemize}
+
+\qquad Al\'em disso, a fun\c{c}\~ao deve ser total, isto \'e, deve estar definida para todos os pares de
+elementos daquele tipo. Sem essa restri\c{c}\~ao, podem existir listas para as quais n\~ao faz sentido
+definir se est\~ao ordenadas ou n\~ao, o que torna imposs\'ivel o desenvolvimento de algoritmos para resolver
+esse problema.
+
+\section{Indu\c{c}\~ao Transfinita}
+
+\qquad Uma t\'atica muito comum para demonstrar teoremas \'e a indu\c{c}\~ao. Dado um predicado $P(n)$ (que
+depende do n\'umero natural $n$), ao se demonstrar a veracidade de $P(0)$, e de $P(k) \rightarrow P(k + 1)$,
+sendo $k$ um n\'umero natural qualquer, o princ\'ipio da indu\c{c}\~ao matem\'atica afirma que $P(n)$ \'e
+verdadeiro para todo $n$. Neste trabalho, ser\'a usado amplamente uma vers\~ao generalizada desse
+princ\'ipio, conhecida como Indu\c{c}\~ao Transfinita. Nesse caso, deve-se supor que $P(k)$ \'e verdadeiro
+para todo $k < n$. Se essa hip\'otese implicar na veracidade de $P(n)$, ent\~ao, pelo princ\'ipio de
+Indu\c{c}\~ao Transfinita, obt\^em-se a veracidade de $P(m)$, para todo $m$ natural.
+
+\qquad Eventualmente ser\'a necess\'ario usar a indu\c{c}\~ao com uma hip\'otese da forma $P(f(n))$, para
+algum predicado $P$ e fun\c{c}\~ao $f : \mathbb{N} \rightarrow \mathbb{N}$. Isso \'e v\'alido, desde que se
+demonstre que $f$ \'e estritamente decrescente. Com essa propriedade, temos a garantia que $f(n) < n$,
+logo a hip\'otese de indu\c{c}\~ao se aplica a $f(n)$. Caso exista algum $n$ tal que $f(n) \geq n$,
+estar\'iamos usando uma hip\'otese que n\~ao temos para demonstrar o teorema, o que \'e inv\'alido.
+
+\section{Lean}
+
+\qquad Lean\cite{2} \'e um assistente de demonstra\c{c}\~oes. Estes s\~ao linguagens de programa\c{c}\~ao que
+possibilitam que seu usu\'ario enuncie e demonstre teoremas, os quais s\~ao verificados pelo compilador do
+assistente, que \'e capaz de determinar se a demonstra\c{c}\~ao \'e v\'alida ou n\~ao.
+
+\qquad Assim como muitos outros assistentes, Lean \'e baseado em \textbf{tipos
+  dependentes}\cite{typesAtWork}. Ou seja, cada proposi\c{c}\~ao que se enuncia dentro da linguagem \'e
+representada internamente por um tipo, o qual depende de valores de outros tipos. Um exemplo para essa
+id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b : T$, o s\'imbolo ``$=$'' age como
+um construtor de tipos, que toma dois valores do tipo $T$ como par\^ametro e retorna o tipo relativo a
+igualdade entre os dois valores. Nesse contexto, construir um termo do tipo ``$a = b$'' equivale a demonstrar
+a igualdade entre esses dois valores.
+
+\qquad O processo de demonstrar teoremas usando apenas tipos dependentes se resume, na maior parte das vezes, a compor fun\c{c}\~oes e analisar casos para conseguir um termo de um determinado tipo, algo que \'e muito dif\'icil de ser praticado em teoremas que envolvem uma longa argumenta\c{c}\~ao, al\'em de produzir demonstra\c{c}\~oes pouco leg\'iveis. O modo convencional de realizar essa tarefa \'e muito diferente. Nele,
+o matem\'atico pode estruturar a demonstra\c{c}\~ao da forma que preferir, sendo poss\'ivel organizar
+ideias complexas de forma menos confusa, o que facilita o trabalho de quem est\'a escrevendo e de quem ir\'a
+ler o argumento depois.
+Lean fornece abstra\c{c}\~oes ao usu\'ario para que o processo de demonstrar teoremas se torne semelhante ao
+convencional. Tais abstra\c{c}\~oes s\~ao conhecidas como t\'aticas. Al\'em de prover as t\'aticas
+correspondentes as t\'ecnicas de demonstra\c{c}\~ao mais comuns (como indu\c{c}\~ao, demonstra\c{c}\~ao por contradi\c{c}\~ao, etc.), o assistente tamb\'em permite que o usu\'ario desenvolva suas pr\'oprias t\'aticas, por meio de metaprograma\c{c}\~ao\cite{metaprog}.
+
+\qquad Lean tamb\'em apresenta um certo n\'ivel de automatiza\c{c}\~ao de demonstra\c{c}\~oes. Dado um certo fato que deseja-se demonstrar, \'e poss\'ivel requisitar ao assistente que se pesquise na biblioteca de teoremas j\'a demonstrados alguma combina\c{c}\~ao que, ou sirva como demonstra\c{c}\~ao direta do que se pretende demonstrar, ou funcione como uma etapa intermedi\'aria, simplificando o fato a ser demonstrado. Tal funcionalidade \'e especialmente \'util se usada em conjunto com a biblioteca mantida pela comunidade, conhecida como mathlib\cite{3}. Nela s\~ao mantidas formaliza\c{c}\~oes extensas de diversas \'areas da matem\'atica e da computa\c{c}\~ao, as quais podem ser usadas livremente para ajudar nas demonstra\c{c}\~oes de teoremas que o usu\'ario desejar. Em particular, nessa biblioteca existe a formaliza\c{c}\~ao dos algoritmos de ordena\c{c}\~ao, as quais ser\~ao usadas ao longo deste trabalho. Tais formaliza\c{c}\~oes
+n\~ao incluem propriedades relacionadas a complexidade temporal desses algoritmos. Isso n\~ao acontece
+apenas nesses dois algoritmos,
+esse tipo de propriedade ainda n\~ao foi formalizada para nenhum algoritmo dessa biblioteca.
+
+\qquad O seguinte c\'odigo apresenta a defini\c{c}\~ao dos n\'umeros naturais, da adi\c{c}\~ao sobre eles e a demonstra\c{c}\~ao da comutatividade dessa opera\c{c}\~ao em Lean, junto com dois lemas necess\'arios para essa demonstra\c{c}\~ao:
+\newpage
+
+\inputminted{lean}{add.lean}
+
+\chapter{Defini\c{c}\~oes dos Algoritmos}
+
+\qquad Como foi mencionado, nesse trabalho ser\'a abordada a complexidade
+temporal de dois algoritmos: Insertion Sort e Merge Sort. Nessa se\c{c}\~ao
+eles ser\~ao definidos em linguagem matem\'atica.
+
+\qquad A defini\c{c}\~ao original desses algoritmos (que \'e usada pela mathlib)
+n\~ao registra a quantidade de compara\c{c}\~oes que
+s\~ao feitas, o que torna imposs\'ivel que se demonstre
+teoremas sobre esses n\'umeros. Por causa
+disso, definimos novas fun\c{c}\~oes que produzem, al\'em de listas,
+n\'umeros naturais que determinam o n\'umero de opera\c{c}\~oes executadas.
+
+\qquad Este trabalho ir\'a apresentar demonstra\c{c}\~oes que as listas
+produzidas por essas novas fun\c{c}\~oes s\~ao id\^enticas \`as produzidas pelas
+fun\c{c}\~oes definidas originalmente, assumindo que elas receberam a mesma entrada. Al\'em
+disso, ser\~ao definidas fun\c{c}\~oes que usam a estrutura da lista para
+determinar exatamente quantas compara\c{c}\~oes s\~ao efetivamente realizadas
+pelos algoritmos. Com isso, demonstraremos que o n\'umero natural retornado pelo
+algoritmo modificado est\'a contando essas compara\c{c}\~oes corretamente. Finalmente,
+demonstraremos um limite para esse n\'umero, em fun\c{c}\~ao do tamanho da lista de entrada.
+Considerando uma lista de tamanho $n$, mostraremos que o Insertion Sort se limita a $n^{2}$
+compara\c{c}\~oes, enquanto o Merge Sort nunca passa de $8 n \log (n)$.
+
+\section{Insertion Sort}
+
+\qquad A seguir apresentamos a defini\c{c}\~ao original da fun\c{c}\~ao auxiliar do
+Insertion Sort, que chamamos de $insert$. Dado um elemento $x$ e uma lista ordenada $xs$,
+$insert(x,xs)$ produz uma nova lista, inserindo $x$ em $xs$ de modo que o resultado
+permane\c{c}a ordenado. Assim como todas as outras fun\c{c}\~oes que ser\~ao definidas,
+sua defini\c{c}\~ao \'e dada por meio de casamento de padr\~oes,
+dependendo da forma da lista de entrada. No caso da lista ter mais de um elemento, usamos
+a fun\c{c}\~ao recursivamente.
+
+\begin{equation}
+insert(x, []) = [x]
+\end{equation}
+
+\begin{equation}
+insert(x, y : ys) =
+  \begin{cases}
+    x : y : ys \text{, \qquad\,\,\,\,\, se } x < y\\
+    y : insert(x, ys) \text{, caso contr\'ario}
+  \end{cases}
+\end{equation}
+
+\newpage
+\qquad A vers\~ao extendida funciona exatamente da mesma forma, mas produz tamb\'em um
+n\'umero natural, que conta o n\'umero de opera\c{c}\~oes realizadas.
+
+\begin{equation}
+insert\_extended(x, []) = ([x], 0)
+\end{equation}
+
+\begin{equation}
+insert\_extended(x, y : ys) =
+  \begin{cases}
+    (x : y : ys, 1) \text{, se } x < y\\
+    (y : l, 1 + n) \text{, caso contr\'ario,}\\ \text{\quad \textbf{onde: }} (l, n) := insert\_extended(x, ys)
+  \end{cases}
+\end{equation}
+
+\qquad Usando $insert$, podemos definir o Insertion Sort.
+Essa fun\c{c}\~ao recebe uma lista $xs$ e produz uma permuta\c{c}\~ao ordenada de $xs$.
+As equa\c{c}\~oes \ref{ins_sort_base} e \ref{ins_sort_ind} representam sua vers\~ao original, enquanto
+\ref{ins_sort_ext_base} e \ref{ins_sort_ext_ind} representam sua vers\~ao extendida.
+
+\begin{equation} \label{ins_sort_base}
+insertion\_sort([]) = []
+\end{equation}
+\begin{equation} \label{ins_sort_ind}
+insertion\_sort(x : xs) = insert(x, insertion\_sort(xs))
+\end{equation}
+
+\begin{equation} \label{ins_sort_ext_base}
+insertion\_sort\_extended([]) = ([], 0)
+\end{equation}
+
+
+\begin{equation}\label{ins_sort_ext_ind}
+\begin{split}
+  insertion\_sort\_extended(x : xs) &= (l', n + m),\\
+  \text{\textbf{onde:} }(l, m) &:= insertion\_sort\_extended(xs)\\
+  \text{\quad} (l', n) &:= insert\_extended(x, l)
+\end{split}
+\end{equation}
+
+\section{Merge Sort}
+\qquad Agora vamos definir o Merge Sort. Para isso, precisaremos de duas fun\c{c}\~oes
+auxiliares. A primeira, chamada $split$, recebe uma lista e produz um par de listas,
+na qual a primeira cont\'em todos os elementos em posi\c{c}\~oes pares da lista de entrada
+e a segunda os elementos de posi\c{c}\~ao \'impar. As equa\c{c}\~oes \ref{split_base} e \ref{split_ind}
+representam a defini\c{c}\~ao original e \ref{split_ext_base} e \ref{split_ext_ind} a vers\~ao extendida.
+Note que, apesar do $split$ n\~ao executar nenhuma compara\c{c}\~ao, \'e necess\'ario contar quantas vezes
+ele \'e usado, pois este n\'umero tem a mesma ordem de grandeza do tamanho da lista, logo essa fun\c{c}\~ao
+pode interferir na performance do Merge Sort.
+
+\begin{equation}\label{split_base}
+split([]) = ([], [])
+\end{equation}
+\begin{equation}
+\begin{split}\label{split_ind}
+  split(x : xs) &= (x : l_{2}, l_{1}),\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}) &:= split(xs)
+\end{split}
+\end{equation}
+
+\newpage
+
+\begin{equation}\label{split_ext_base}
+  split\_extended([]) = ([], [], 0)
+\end{equation}
+\begin{equation}\label{split_ext_ind}
+\begin{split}
+  split\_extended(x : xs) &= (x : l_{2}, l_{1}, 1 + n)\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= split\_extended(xs)
+\end{split}
+\end{equation}
+
+
+\qquad A segunda fun\c{c}ao auxiliar, que chamamos de $merge$, recebe duas listas
+ordenadas e produz uma nova lista, intercalando todos os elementos das listas
+de entrada, de modo que a lista final esteja ordenada. As equa\c{c}\~oes \ref{merge_1},
+\ref{merge_2} e \ref{merge_3} s\~ao sua vers\~ao original, e as equa\c{c}\~oes
+\ref{merge_ext_1}, \ref{merge_ext_2} e \ref{merge_ext_3} s\~ao sua vers\~ao extendida.
+
+\begin{equation} \label{merge_1}
+merge(xs, []) = xs
+\end{equation}
+\begin{equation} \label{merge_2}
+merge([], ys) = ys
+\end{equation}
+
+\begin{equation} \label{merge_3}
+merge(x : xs, y : ys) =
+     \begin{cases}
+       x : merge(xs, y : ys) \text{,\qquad se $x < y$} \\
+       y : merge(x : xs, ys) \text{,\qquad caso contr\'ario}
+     \end{cases}
+\end{equation}
+
+\begin{equation} \label{merge_ext_1}
+merge\_extended(xs, []) = (xs, 0)
+\end{equation}
+\begin{equation} \label{merge_ext_2}
+merge\_extended([], ys) = (ys, 0)
+\end{equation}
+
+\begin{equation} \label{merge_ext_3}
+merge\_extended(x : xs, y : ys) =
+     \begin{cases}
+       (x : l_{1}, 1 + n) \text{,\qquad se $x < y$} \\
+       % \text{\quad \textbf{onde: }} (l_{1}, n) = merge\_extended(xs, y : ys) \\
+       (y : l_{2}, 1 + m) \text{,\qquad caso contr\'ario} \\
+       \text{\quad \textbf{onde: }} (l_{1}, n) := merge\_extended(xs, y : ys) \\
+       \text{\qquad \quad \,\,\,\,\, } (l_{2}, m) := merge\_extended(x : xs, ys)
+     \end{cases}
+\end{equation}
+
+\qquad Com essas duas fun\c{c}\~oes, podemos finalmente definir o Merge Sort. Assim como o Insertion
+Sort, o Merge Sort recebe uma lista $xs$ e produz uma permuta\c{c}\~ao ordenada de $xs$. As
+equa\c{c}\~oes \ref{ms_1}, \ref{ms_2} e \ref{ms_3} representam sua defini\c{c}\~ao original,
+enquanto as equa\c{c}\~oes \ref{ms_ext_1}, \ref{ms_ext_2} e \ref{ms_ext_3} representam
+sua vers\~ao extendida.
+
+\begin{equation}\label{ms_1}
+merge\_sort([]) = []
+\end{equation}
+
+\begin{equation}\label{ms_2}
+merge\_sort([x]) = [x]
+\end{equation}
+
+\begin{equation}\label{ms_3}
+\begin{split}
+  merge\_sort(x_{1} : x_{2} : xs) &= merge(l_{1}', l_{2}'),\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}) &:= split(x_{1} : x_{2} : xs),\\
+  l_{1}' &:= merge\_sort(l_{1}),\\
+  l_{2}' &:= merge\_sort(l_{2})
+\end{split}
+\end{equation}
+
+\begin{equation}\label{ms_ext_1}
+merge\_sort\_extended([]) = ([], 0)
+\end{equation}
+
+\begin{equation}\label{ms_ext_2}
+merge\_sort\_extended([x]) = ([x], 0)
+\end{equation}
+
+\begin{equation}\label{ms_ext_3}
+\begin{split}
+  merge\_sort\_extended(x_{1} : x_{2} : xs) &= (l, n + m_{1} + m_{2} + p),\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= split\_extended(x_{1} : x_{2} : xs),\\
+  (l_{1}', m_{1}) &:= merge\_sort\_extended(l_{1}),\\
+  (l_{2}', m_{2}) &:= merge\_sort\_extended(l_{2}),\\
+  (l, p) &:= merge\_extended(l_{1}', l_{2}')
+\end{split}
+\end{equation}
+
+\section{Fun\c{c}\~oes para Certifica\c{c}\~ao}
+
+\qquad Como foi mencionado, tamb\'em ser\'a demonstrado que o n\'umero de compara\c{c}\~oes
+calculado pelas fun\c{c}\~oes \'e, de fato, o n\'umero de compara\c{c}\~oes que est\~ao sendo feitas.
+Para isso, tamb\'em precisamos definir fun\c{c}\~oes que calculam, para uma determinada lista,
+qual o n\'umero de compara\c{c}\~oes que cada um dos algoritmos realiza.
+
+\qquad Sabemos que $insert$ realiza uma compara\c{c}\~ao para cada elemento do prefixo da lista
+de entrada que \'e menor do que o elemento que estamos inserindo, e mais uma para o primeiro
+que n\~ao \'e menor (caso ele exista). A seguinte fun\c{c}\~ao usa essa informa\c{c}\~ao
+para produzir o n\'umero exato de compara\c{c}\~oes:
+
+\begin{equation}
+  comparisons\_insert(x, []) = 0
+\end{equation}
+
+
+\begin{equation}
+\begin{split}
+  comparisons\_insert(x, y : ys) =
+    \begin{cases}
+      1, &\text{se } y < x \\
+      1 + comparisons\_insert(x, ys), &\text{caso contr\'ario}
+    \end{cases}
+\end{split}
+\end{equation}
+
+
+\qquad No caso do $merge$, para cada elemento da primeira lista, devemos encontrar o primeiro
+elemento da segunda que n\~ao \'e menor do ele. Ao encontrarmos, repetimos o processo com o pr\'oximo
+elemento da primeira lista e o sufixo que sobrou da segunda lista. A seguir, definimos uma
+fun\c{c}\~ao auxiliar para contar as opera\c{c}\~oes do $merge$. Ela
+recebe um elemento e uma lista ordenada, e remove o prefixo da lista que \'e menor do que o elemento
+recebido:
+
+\begin{equation}
+  remove\_prefix(x, []) = []
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  remove\_prefix(x, y : ys) =
+    \begin{cases}
+      y : ys, &\text{se } y < x \\
+      remove\_prefix(x, ys) &\text{caso contr\'ario}
+    \end{cases}
+\end{split}
+\end{equation}
+
+\qquad Agora vamos definir a fun\c{c}\~ao que calcula o n\'umero de compara\c{c}\~oes em uma execu\c{c}\~ao
+do $merge$. Note que, pela similiaridade entre
+o $insert$ e as opera\c{c}\~oes que o $merge$ realiza em cada um dos elementos,
+podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'umero.
+
+\begin{equation}
+  comparisons\_merge([], ys) = 0
+\end{equation}
+
+\begin{equation}
+  comparisons\_merge(xs, []) = 0
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  &comparisons\_merge(x : xs, ys) = \\
+  &\text{\quad} comparisons\_insert(x, ys) + comparisons\_merge(xs, ys') \\
+  &\text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
+\end{split}
+\end{equation}
+
+\chapter{Demonstra\c{c}\~oes Informais}
+\section{Insertion Sort}
+\section{Merge Sort}
+
+\chapter{Formaliza\c{c}\~ao em Lean}
+- Colocando apenas os codigos das fun\c{c}\~oes por enquanto
+
+\inputminted{lean}{declarations.lean}
+\section{Insertion Sort}
+\inputminted{lean}{insertion_sort.lean}
+\inputminted{lean}{insertion_sort_modified.lean}
+
+\section{Merge Sort}
+
+\inputminted{lean}{merge_sort.lean}
+\inputminted{lean}{merge_sort_modified.lean}
+
+\chapter{Conclus\~ao}
+
+\postextual
+
+% \bibliographystyle{abbrv}
+\bibliography{ref}
+
+
+\end{document}
