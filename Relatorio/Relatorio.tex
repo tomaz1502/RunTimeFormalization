@@ -580,7 +580,7 @@ para produzir o n\'umero exato de compara\c{c}\~oes:
 \begin{split}
   comparisons\_insert(x, y : ys) =
     \begin{cases}
-      1, &\text{se } y < x \\
+      1, &\text{se } x < y \\
       1 + comparisons\_insert(x, ys), &\text{caso contr\'ario}
     \end{cases}
 \end{split}
@@ -602,7 +602,7 @@ recebido:
 \begin{split}
   remove\_prefix(x, y : ys) =
     \begin{cases}
-      y : ys, &\text{se } y < x \\
+      y : ys, &\text{se } x < y \\
       remove\_prefix(x, ys) &\text{caso contr\'ario}
     \end{cases}
 \end{split}
@@ -630,6 +630,10 @@ podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'u
 \end{equation}
 
 \chapter{Demonstra\c{c}\~oes Informais}
+
+Nesta se\c{c}\~ao iremos apresentar e demonstar os teoremas necess\'arios
+
+
 \section{Insertion Sort}
 \section{Merge Sort}
 
