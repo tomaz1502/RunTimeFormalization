@@ -1,4 +1,5 @@
 import data.list.sort tactic
+import data.nat.log
 
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
 local infix ` ≼ ` : 50 := r
@@ -27,15 +28,6 @@ namespace counting
 #eval insertion_sort (λ m n : ℕ , m ≤ n) [5, 4, 3, 2, 1]
 -- ([1, 2, 3, 4, 5], 10)
 
-@[simp] def smaller_prefix (a : α) : list α → ℕ
-| [] := 0
-| (h :: t) := if a ≼ h then 0 else 1 + smaller_prefix t
-
-#eval smaller_prefix (λ m n : ℕ , m ≤ n) 6 [3, 1, 9, 4]
--- 2
-
-#eval smaller_prefix (λ m n : ℕ , m ≤ n) 5 [6, 3, 2, 0]
--- 0
 
 theorem ordered_insert_complexity (a : α) :
   ∀ l : list α, (ordered_insert r a l).snd ≤ l.length :=
@@ -74,21 +66,6 @@ begin
   intro l,
   rw ordered_insert_equivalence r a l,
   exact list.ordered_insert_length r l a,
-end
-
-theorem comparisons_ordered_insertion (a : α) : ∀ l : list α,
-  (ordered_insert r a l).snd = smaller_prefix (≼) a l :=
-begin
-  intro l,
-  induction l,
-  { simp, },
-  { simp, split_ifs,
-    { exact rfl, },
-    { rw ← l_ih,
-      cases (ordered_insert r a l_tl),
-      unfold ordered_insert,
-    }
-  }
 end
 
 theorem insertion_sort_preserves_length : ∀ l : list α,

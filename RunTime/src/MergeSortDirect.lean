@@ -6,8 +6,110 @@ local infix ` ≼ ` : 50 := r
 
 namespace counting
 
-theorem easy_le {a b : ℕ} : 2 * a ≤ 2 * b → a ≤ b := by { intro h, omega }
-theorem easy_eq {a b : ℕ} : 2 * a = 2 * b → a = b := by { intro h, omega }
+-- USED LEMMAS
+
+lemma log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
+| 0  := begin intros b h, exact bot_le, end
+| (n+1) := have (n + 1) / 2 < n + 1, from nat.div_lt_self' n 0,
+begin
+  intros b h,
+  cases b,
+  { finish, },
+
+  have half_leq : (n + 1) / 2 ≤ (b + 1) / 2 := nat.div_le_div_right h,
+  have ih := log_monotonic half_leq,
+  rw nat.log,
+  split_ifs,
+  { refine ge.le _, rw nat.log, split_ifs,
+    { refine add_le_add (log_monotonic half_leq) _, exact rfl.ge},
+    {
+      have hh := not_and_distrib.mp h_2,
+      simp at hh,
+      cases hh,
+      {
+        have absurd : b.succ < b.succ := calc b.succ < 2      : hh
+                                              ...    ≤ n + 1  : h_1.1
+                                              ...    ≤ b.succ : h,
+        by_contra,
+        exact nat.lt_asymm absurd absurd,
+      },
+      by_contra,
+      exact nat.lt_asymm hh hh,
+    },
+  },
+  exact bot_le,
+end
+
+lemma log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
+| 0 := begin simp, rw nat.log, split_ifs, { finish, }, simp, end 
+| 1 := begin rw nat.log, split_ifs, { exact rfl, }, simp, rw nat.log, split_ifs, { have absurd := h_1.1, norm_num at absurd, }, exact rfl, end
+| (a + 2) :=
+begin
+  rw nat.log,
+  split_ifs,
+  { exact rfl, },
+  simp at h,
+  have h' := h,
+  by_contra,
+  exact nat.lt_asymm h' h',
+end
+
+lemma log_2_val : nat.log 2 2 = 1 :=
+begin
+  rw nat.log,
+  split_ifs,
+  { simp, rw nat.log, split_ifs, { by_contra, have s := h_1.1, exact nat.lt_asymm s s, }, simp, },
+  simp at h, omega,
+end
+
+lemma sum_2b (a b : ℕ) : a ≤ 2 * b → a + 2 * b ≤ 4 * b :=
+begin
+  intro h,
+  calc a + 2 * b ≤ 2 * b + 2 * b : by { refine add_le_add h _, exact rfl.ge }
+       ...       = 4 * b : by linarith
+end
+
+lemma log_2_times : ∀ (a : ℕ) , 1 < a → 4 * nat.log 2 a ≤ 2 * a
+| 0 := begin intro h, norm_num at h, end
+| 1 := begin intro h, norm_num at h, end
+| 2 := begin intro h, rw nat.log, split_ifs, { simp, rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
+| 3 := begin intro h, rw nat.log, split_ifs, { rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
+| (a + 4) := have (a + 4) / 2 < a + 4 := (a + 3).div_lt_self' 0,
+begin
+  intro h,
+  have hh : 1 < ((a + 4) / 2) := (cmp_eq_lt_iff 1 ((a + 4) / 2)).mp rfl,
+  have ih := log_2_times ((a + 4) / 2) hh,
+  
+  rw ← log_pred (a + 4) at ih,
+
+  rw nat.mul_sub_left_distrib 4 (nat.log 2 (a + 4)) 1 at ih,
+  simp at ih,
+
+  have leq_1 : 4 * nat.log 2 (a + 4) ≤ 2 * ((a + 4) / 2) + 4 := nat.le_add_of_sub_le_right ih,
+  have leq_2 : 2 * ((a + 4) / 2) + 4 ≤ 2 * (a + 4) :=
+  begin
+    calc 2 * ((a + 4) / 2) + 4 ≤ a + 4 + 4 : begin rw mul_comm, refine (add_le_add_iff_right 4).mpr _, exact (nat.div_mul_le_self (a + 4) 2), end
+         ...                   ≤ a + a + 4 + 4 : nat.le_add_left (a + 4 + 4) a
+         ...                   = 2 * (a + 4) : by linarith
+  end,
+  exact le_trans leq_1 leq_2,
+end
+
+lemma div_two : ∀ (b a : ℕ) , 2 * a ≤ b → a ≤ b / 2
+| 0       a       := begin intro h, simp, norm_num at h, exact h, end
+| 1       0       := begin intro h, norm_num, end
+| 1       (a + 1) := begin intro h, rw mul_add at h, norm_num at h, linarith,  end
+| (b + 2) 0       := begin intro h, exact bot_le, end
+| (b + 2) (a + 1) :=
+begin
+  intros h,
+  have q : a ≤ b / 2 := begin refine div_two b a _, rw mul_add at h, simp at h, exact h, end,
+
+  calc a + 1 ≤ b / 2 + 1   : by { refine add_le_add q _, exact rfl.ge }
+       ...   ≤ (b + 2) / 2 : rfl.ge
+end
+
+-- SPLIT THEOREMS
 
 @[simp] def split : list α → (list α × list α × ℕ)
 | []       := ([], [], 0)
@@ -50,7 +152,7 @@ end
 theorem length_split_lt {a b} {l l₁ l₂ : list α} {n : ℕ} (h : split (a::b::l) = (l₁, l₂, n)) :
   list.length l₁ < list.length (a::b::l) ∧ list.length l₂ < list.length (a::b::l) :=
 begin
-  have eq_mathlib : l₁ = (a::b::l).split.fst ∧ l₂ = (a::b::l).split.snd :=
+  have split_eq_full : l₁ = (a::b::l).split.fst ∧ l₂ = (a::b::l).split.snd :=
   begin
     have l₂_n_id : (l₂, n) = (split (a :: b :: l)).snd := (congr_arg prod.snd h).congr_right.mpr rfl,
     have l₂_id : l₂ = (split (a :: b :: l)).snd.fst := (congr_arg prod.fst l₂_n_id).congr_right.mp rfl,
@@ -63,11 +165,11 @@ begin
 
     exact ⟨ l₁_id , l₂_id ⟩,
   end,
-  cases eq_mathlib,
+  cases split_eq_full,
   have reconstruct : (a::b::l).split = (l₁, l₂) :=
   begin
-    rw eq_mathlib_left,
-    rw eq_mathlib_right,
+    rw split_eq_full_left,
+    rw split_eq_full_right,
     exact prod.ext rfl rfl,
   end ,
   exact list.length_split_lt reconstruct,
@@ -104,29 +206,28 @@ begin
   { rw ← h_3, simp, linarith, },
 end
 
-theorem wot : ∀ n : ℕ , 0 < n →  1 < 2 * n
-| 0 := begin intro h', by_contra, exact nat.lt_asymm h' h', end
-| (n + 1) := 
+include r
+
+theorem split_lengths : ∀ (l l₁ l₂ : list α) {n : ℕ}, split l = (l₁, l₂, n) → l₁.length + l₂.length = l.length
+| []  := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
+| [a] := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
+| (a :: b :: t) :=
 begin
-  intro h,
-  rw mul_add,
-  norm_num,
-  exact (cmp_eq_lt_iff 1 (2 * n + 2)).mp rfl,
+  intros l₁ l₂ n h,
+  cases e : split t with l₁' l₂'m,
+  cases l₂'m with l₂' m,
+  simp at h,
+  rw e at h,
+  unfold split at h,
+  have ih := split_lengths t l₁' l₂' e,
+  injection h,
+  injection h_2,
+  rw ← h_1,
+  rw ← h_3,
+  simp, linarith,
 end
 
-theorem div_two : ∀ (b a : ℕ) , 2 * a ≤ b → a ≤ b / 2
-| 0       a       := begin intro h, simp, norm_num at h, exact h, end
-| 1       0       := begin intro h, norm_num, end
-| 1       (a + 1) := begin intro h, rw mul_add at h, norm_num at h, linarith,  end
-| (b + 2) 0       := begin intro h, exact bot_le, end
-| (b + 2) (a + 1) :=
-begin
-  intros h,
-  have q : a ≤ b / 2 := begin refine div_two b a _, rw mul_add at h, simp at h, exact h, end,
-
-  calc a + 1 ≤ b / 2 + 1   : by { refine add_le_add q _, exact rfl.ge }
-       ...   ≤ (b + 2) / 2 : rfl.ge
-end
+-- MERGE THEOREMS
 
 def merge : list α → list α → (list α × ℕ)
 | []       l'        := (l', 0)
@@ -134,25 +235,6 @@ def merge : list α → list α → (list α × ℕ)
 | (a :: l) (b :: l') := if a ≼ b
                         then let (l'', n) := merge l (b :: l') in (a :: l'', n + 1)
                         else let (l'', n) := merge (a :: l) l' in (b :: l'', n + 1)
-
-include r
-
-def merge_sort : list α → (list α × ℕ)
-| []        := ([],  0)
-| [a]       := ([a], 0)
-| (a::b::l) := begin
-  cases e : split (a::b::l) with l₁ l₂n,
-  cases l₂n with l₂ n,
-  cases length_split_lt e with h₁ h₂,
-  have ms₁ := merge_sort l₁,
-  have ms₂ := merge_sort l₂,
-  have merged := merge r ms₁.fst ms₂.fst,
-  have split_ops := (split (a::b::l)).snd.snd,
-  exact ( merged.fst , split_ops + ms₁.snd + ms₂.snd + merged.snd),
-end
-using_well_founded {
-  rel_tac := λ_ _, `[exact ⟨_, inv_image.wf list.length nat.lt_wf⟩],
-  dec_tac := tactic.assumption }
 
 theorem merge_complexity : ∀ l l' : list α , (merge r l l').snd ≤ l.length + l'.length
 | []   []               := by { unfold merge, simp }
@@ -203,6 +285,25 @@ begin
   }
 end
 
+-- MERGE SORT THEOREMS
+
+def merge_sort : list α → (list α × ℕ)
+| []        := ([],  0)
+| [a]       := ([a], 0)
+| (a::b::l) := begin
+  cases e : split (a::b::l) with l₁ l₂n,
+  cases l₂n with l₂ n,
+  cases length_split_lt e with h₁ h₂,
+  have ms₁ := merge_sort l₁,
+  have ms₂ := merge_sort l₂,
+  have merged := merge r ms₁.fst ms₂.fst,
+  have split_ops := (split (a::b::l)).snd.snd,
+  exact ( merged.fst , split_ops + ms₁.snd + ms₂.snd + merged.snd),
+end
+using_well_founded {
+  rel_tac := λ_ _, `[exact ⟨_, inv_image.wf list.length nat.lt_wf⟩],
+  dec_tac := tactic.assumption }
+
 theorem merge_sort_cons_cons_fst {a b n} {l l₁ l₂ : list α}
   (h : split (a::b::l) = (l₁, l₂, n)) :
   (merge_sort r (a::b::l)).fst = (merge r (merge_sort r l₁).fst (merge_sort r l₂).fst).fst :=
@@ -211,22 +312,6 @@ begin
     (λ a a (_ : list.length l₁ < list.length l + 1 + 1 ∧
       list.length l₂ < list.length l + 1 + 1), L) h1 h1).fst = L.fst,
     { simp [merge_sort, h], apply this, },
-  intros, cases h1, refl,
-end
-
-theorem merge_sort_cons_cons_snd {a b n} {l l₁ l₂ : list α}
-  (hs : split (a::b::l) = (l₁, l₂, n)) :
-  (merge_sort r (a::b::l)).snd =
-    (split (a::b::l)).snd.snd +
-    (merge_sort r l₁).snd +
-    (merge_sort r l₂).snd +
-    (merge r (merge_sort r l₁).fst (merge_sort r l₂).fst).snd
-  :=
-begin
-  suffices : ∀ (L : list α × ℕ) h1, (@@and.rec
-    (λ a a (_ : list.length l₁ < list.length l + 1 + 1 ∧
-      list.length l₂ < list.length l + 1 + 1), L) h1 h1).snd = L.snd,
-    { simp [merge_sort, hs], apply this, },
   intros, cases h1, refl,
 end
 
@@ -259,110 +344,20 @@ begin
 end
 using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
 
-theorem log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
-| 0  := begin intros b h, exact bot_le, end
-| (n+1) := have (n + 1) / 2 < n + 1, from nat.div_lt_self' n 0,
+theorem merge_sort_cons_cons_snd {a b n} {l l₁ l₂ : list α}
+  (hs : split (a::b::l) = (l₁, l₂, n)) :
+  (merge_sort r (a::b::l)).snd =
+    (split (a::b::l)).snd.snd +
+    (merge_sort r l₁).snd +
+    (merge_sort r l₂).snd +
+    (merge r (merge_sort r l₁).fst (merge_sort r l₂).fst).snd
+  :=
 begin
-  intros b h,
-  cases b,
-  { finish, },
-
-  have half_leq : (n + 1) / 2 ≤ (b + 1) / 2 := nat.div_le_div_right h,
-  have ih := log_monotonic half_leq,
-  rw nat.log,
-  split_ifs,
-  { refine ge.le _, rw nat.log, split_ifs,
-    { refine add_le_add (log_monotonic half_leq) _, exact rfl.ge},
-    {
-      have hh := not_and_distrib.mp h_2,
-      simp at hh,
-      cases hh,
-      {
-        have absurd : b.succ < b.succ := calc b.succ < 2      : hh
-                                              ...    ≤ n + 1  : h_1.1
-                                              ...    ≤ b.succ : h,
-        by_contra,
-        exact nat.lt_asymm absurd absurd,
-      },
-      by_contra,
-      exact nat.lt_asymm hh hh,
-    },
-  },
-  exact bot_le,
-end
-
-theorem split_lengths : ∀ (l l₁ l₂ : list α) {n : ℕ}, split l = (l₁, l₂, n) → l₁.length + l₂.length = l.length
-| []  := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
-| [a] := begin intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, end
-| (a :: b :: t) :=
-begin
-  intros l₁ l₂ n h,
-  cases e : split t with l₁' l₂'m,
-  cases l₂'m with l₂' m,
-  simp at h,
-  rw e at h,
-  unfold split at h,
-  have ih := split_lengths t l₁' l₂' e,
-  injection h,
-  injection h_2,
-  rw ← h_1,
-  rw ← h_3,
-  simp, linarith,
-end
-
-theorem log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
-| 0 := begin simp, rw nat.log, split_ifs, { finish, }, simp, end 
-| 1 := begin rw nat.log, split_ifs, { exact rfl, }, simp, rw nat.log, split_ifs, { have absurd := h_1.1, norm_num at absurd, }, exact rfl, end
-| (a + 2) :=
-begin
-  rw nat.log,
-  split_ifs,
-  { exact rfl, },
-  simp at h,
-  have h' := h,
-  by_contra,
-  exact nat.lt_asymm h' h',
-end
-
-theorem log_2_val : nat.log 2 2 = 1 :=
-begin
-  rw nat.log,
-  split_ifs,
-  { simp, rw nat.log, split_ifs, { by_contra, have s := h_1.1, exact nat.lt_asymm s s, }, simp, },
-  simp at h, omega,
-end
-
-theorem sum_2b (a b : ℕ) : a ≤ 2 * b → a + 2 * b ≤ 4 * b :=
-begin
-  intro h,
-  calc a + 2 * b ≤ 2 * b + 2 * b : by { refine add_le_add h _, exact rfl.ge }
-       ...       = 4 * b : by linarith
-end
-
-theorem log_2_times : ∀ (a : ℕ) , 1 < a → 4 * nat.log 2 a ≤ 2 * a
-| 0 := begin intro h, norm_num at h, end
-| 1 := begin intro h, norm_num at h, end
-| 2 := begin intro h, rw nat.log, split_ifs, { simp, rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
-| 3 := begin intro h, rw nat.log, split_ifs, { rw nat.log, split_ifs, { have abs := h_2.1, norm_num at abs, }, norm_num, }, norm_num, end
-| (a + 4) := have (a + 4) / 2 < a + 4 := (a + 3).div_lt_self' 0,
-begin
-  intro h,
-  have hh : 1 < ((a + 4) / 2) := (cmp_eq_lt_iff 1 ((a + 4) / 2)).mp rfl,
-  have ih := log_2_times ((a + 4) / 2) hh,
-  
-  rw ← log_pred r (a + 4) at ih,
-
-  rw nat.mul_sub_left_distrib 4 (nat.log 2 (a + 4)) 1 at ih,
-  simp at ih,
-
-  have leq_1 : 4 * nat.log 2 (a + 4) ≤ 2 * ((a + 4) / 2) + 4 := nat.le_add_of_sub_le_right ih,
-  have leq_2 : 2 * ((a + 4) / 2) + 4 ≤ 2 * (a + 4) :=
-  begin
-    calc 2 * ((a + 4) / 2) + 4 ≤ a + 4 + 4 : begin rw mul_comm, refine (add_le_add_iff_right 4).mpr _, exact (nat.div_mul_le_self (a + 4) 2), end
-         ...                   ≤ a + a + 4 + 4 : nat.le_add_left (a + 4 + 4) a
-         ...                   = 2 * (a + 4) : by linarith
-  end,
-  exact le_trans leq_1 leq_2,
+  suffices : ∀ (L : list α × ℕ) h1, (@@and.rec
+    (λ a a (_ : list.length l₁ < list.length l + 1 + 1 ∧
+      list.length l₂ < list.length l + 1 + 1), L) h1 h1).snd = L.snd,
+    { simp [merge_sort, hs], apply this, },
+  intros, cases h1, refl,
 end
 
 theorem merge_sort_complexity : ∀ l : list α , (merge_sort r l).snd ≤ 8 * l.length * nat.log 2 l.length
@@ -401,14 +396,14 @@ begin
     have ms_id : (merge_sort r l₂).snd = ms := (congr_arg prod.snd h₂).trans rfl,
     rw ← ms_id,
     refine le_trans ih₂ _,
-    rw log_pred r l.length,
+    rw log_pred l.length,
     calc 8 * l₂.length * nat.log 2 l₂.length
                 = 4 * (2 * l₂.length) * nat.log 2 l₂.length : by linarith
             ... ≤ 4 * l.length * nat.log 2 l₂.length : begin rw mul_assoc, rw mul_assoc 4 l.length (nat.log 2 l₂.length),
                                                              refine (mul_le_mul_left zero_lt_four).mpr _,
                                                              exact nat.mul_le_mul_right (nat.log 2 l₂.length) l₂_length,
                                                        end
-            ... ≤ 4 * l.length * nat.log 2 (l.length / 2) : begin refine nat.mul_le_mul_left (4 * l.length) _, exact log_monotonic r l₂_length_half, end
+            ... ≤ 4 * l.length * nat.log 2 (l.length / 2) : begin refine nat.mul_le_mul_left (4 * l.length) _, exact log_monotonic l₂_length_half, end
   end,
 
   have ns_bound : ns ≤ 4 * (l.length + 1) * nat.log 2 l.length :=
@@ -422,7 +417,7 @@ begin
                                                                    refine (mul_le_mul_left zero_lt_four).mpr _,
                                                                    exact nat.mul_le_mul_right (nat.log 2 l₁.length) l₁_length,
                                                              end
-            ... ≤ 4 * (l.length + 1) * nat.log 2 l.length : begin refine nat.mul_le_mul_left (4 * (l.length + 1)) _, exact log_monotonic r l₁_length_weak, end
+            ... ≤ 4 * (l.length + 1) * nat.log 2 l.length : begin refine nat.mul_le_mul_left (4 * (l.length + 1)) _, exact log_monotonic l₁_length_weak, end
   end,
 
   have split_length : l₁s.length + l₂s.length = l.length :=
@@ -455,8 +450,8 @@ begin
 
   have log_l_length : 1 ≤ nat.log 2 l.length :=
   begin
-    calc 1 = nat.log 2 2 : (log_2_val r).symm
-         ... ≤ nat.log 2 l.length : begin refine log_monotonic r _, linarith, end
+    calc 1 = nat.log 2 2 : log_2_val.symm
+         ... ≤ nat.log 2 l.length : begin refine log_monotonic _, linarith, end
   end,
 
   have four_log_l_length : 4 * 1 * l.length ≤ 4 * nat.log 2 l.length * l.length :=
@@ -502,9 +497,9 @@ begin
                                                      rw add_assoc,
                                                      refine (add_le_add_iff_left (8 * nat.log 2 l.length * l.length)).mpr _,
 
-                                                     refine sum_2b r (4 * nat.log 2 l.length) l.length _,
-                                                     exact log_2_times r l.length one_lt_l_length,
-                                                    end
+                                                     refine sum_2b (4 * nat.log 2 l.length) l.length _,
+                                                     exact log_2_times l.length one_lt_l_length,
+                                                    end,
 end
 using_well_founded {rel_tac := λ _ _, `[exact ⟨_, measure_wf list.length⟩]}
 
