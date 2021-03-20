@@ -1,5 +1,6 @@
 \documentclass[12pt, oneside, a4paper,english,brazil]{abntex2}
 
+\usepackage[nonumberlist=true]{glossaries}
 \usepackage[utf8]{inputenc} % Codificação do documento (conversão automática
                             % dos acentos)
 \usepackage{lmodern} % Usa a fonte Latin Modern
@@ -17,6 +18,7 @@
 \usepackage{minted}
 \usepackage{proof}
 \usepackage{amsmath,amsfonts,amsthm,bm}
+% \usepackage[nonumberlist,style=index,nomain]{glossaries}%
 
 \DeclareUnicodeCharacter{2200}{$\mathbb{\forall}$}
 \DeclareUnicodeCharacter{227C}{$\preceq$}
@@ -40,12 +42,39 @@ Universidade Federal de Minas Gerais
 
 % \preambulo{Proposta de Pesquisa Científica}
 
+\makeglossaries
+
+\setglossarystyle{altlist}
+
+
+\newglossaryentry{proj2}{name = $proj_{2}(p)$, description={Segundo elemento do par ordenado $p$}}
+
+\newglossaryentry{proj1}{name = $proj_{1}(p)$, description={Primeiro elemento do par ordenado $p$}}
+
+\newglossaryentry{listindex}{name = $[a]_{i}$, description={$i$-\'esimo elemento da lista $a$}}
+
+\newglossaryentry{listempty}{name = $[]$, description = {Lista vazia}}
+
+\newglossaryentry{listcons}{name = $h : t$, description={Lista composta pelo elemento $h$ seguido pela lista $t$}}
+
+\newglossaryentry{listtype}{name = $[A]$, description={Tipo das listas de elementos do tipo $A$}}
+
+\newglossaryentry{typing}{name=$a :: A$, description={Termo $a$ tem tipo $A$}}
+
+\newglossaryentry{functype}{ name=$A \rightarrow B$, description={Tipo das fun\c{c}\~oes do tipo $A$ para o tipo $B$}  }
+
+\newglossaryentry{implies}{
+                name=$A \Rightarrow B$,
+                description={Proposi\c{c}\~ao $A$ implica em proposi\c{c}\~ao $B$} }
 \begin{document}
 
 \imprimircapa
 \imprimirfolhaderosto
 
 \tableofcontents* %\sumario %comando que gera o sumário automaticamente
+
+\glsaddall
+\printglossaries
 
 \textual
 
@@ -104,20 +133,20 @@ imediatamente na execução.
 
 \subsection*{Isomorfismo de Curry-Howard}
 \qquad Em meados do século XX, foi descoberto que os Sistemas de Tipos possuíam uma
-relação muito profunda com a lógica. Considere, por exemplo, uma função $f : A \rightarrow B$
+relação muito profunda com a lógica. Considere, por exemplo, uma função $f :: A \rightarrow B$
 sendo $A$ e $B$ tipos quaisquer. Uma regra clássica dos sistemas de tipo é algo como:
 
 \begin{center}
-  $\infer{f(a) : B}{f : A \rightarrow B & a : A}$
+  $\infer{f(a) :: B}{f :: A \rightarrow B & a :: A}$
 \end{center}
 
 \qquad Ou seja, se $f$ é uma função de $A$ para $B$ e $a$ é um objeto do tipo $A$, então aplicar
 $f$ em $a$ produz algo do tipo $B$. Na lógica proposicional existe uma regra de inferência
-semelhante a isso. Se $P$ e $Q$ são proposições e $P \rightarrow Q$ denota que a proposição $P$ implica
+semelhante a isso. Se $P$ e $Q$ são proposições e $P \Rightarrow Q$ denota que a proposição $P$ implica
 em $Q$, a regra chamada Modus Ponens estabelece a seguinte relação:
 
 \begin{center}
-  $\infer{Q}{P \rightarrow Q & P}$
+  $\infer{Q}{P \Rightarrow Q & P}$
 \end{center}
 
 \qquad Se possuímos uma demonstração de que a proposição $P$ é verdadeira e que $P$
@@ -126,7 +155,7 @@ implica em $Q$, então podemos usar essa regra para concluir que $Q$ é verdadei
 \qquad De fato, esses dois sistemas não são apenas semelhantes, mas equivalentes. Note
 que a única diferença entre as duas regras é a natureza dos objetos aos quais elas se referem.
 Se identificarmos proposições como tipos e demonstrações como termos de um determinado
-tipo, então não existe diferença entre elas. Podemos interpretar a proposição $P \rightarrow Q$ como
+tipo, então não existe diferença entre elas. Podemos interpretar a proposição $P \Rightarrow Q$ como
 o tipo das funções que levam demonstrações de $P$ em demonstrações de $Q$.
 
 \qquad Um isomorfismo entre duas categorias de objetos matemáticos é um mapeamento
@@ -301,9 +330,9 @@ total sobre o tipo. Isso significa que, se a fun\c{c}\~ao de compara\c{c}\~ao so
 pelo operador bin\'ario ``$\le$'', as seguintes propriedades devem valer:
 
 \begin{itemize}
-  \item $\forall t : T, t \le t$
-  \item $\forall t_{1}, t_{2} : T, t_{1} \le t_{2} \wedge t_{2} \le t_{1} \leftrightarrow t_{1} = t_{2}$
-  \item $\forall t_{1}, t_{2}, t_{3} : T, t_{1} \le t_{2} \wedge t_{2} \le t_{3} \rightarrow t_{1} \le t_{3}$
+  \item $\forall t :: T, \quad t \le t$
+  \item $\forall t_{1}, t_{2} :: T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{1} \leftrightarrow t_{1} = t_{2}$
+  \item $\forall t_{1}, t_{2}, t_{3} :: T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{3} \rightarrow t_{1} \le t_{3}$
 \end{itemize}
 
 \qquad Al\'em disso, a fun\c{c}\~ao deve ser total, isto \'e, deve estar definida para todos os pares de
@@ -314,7 +343,7 @@ esse problema.
 \section{Indu\c{c}\~ao Transfinita}
 
 \qquad Uma t\'atica muito comum para demonstrar teoremas \'e a indu\c{c}\~ao. Dado um predicado $P(n)$ (que
-depende do n\'umero natural $n$), ao se demonstrar a veracidade de $P(0)$, e de $P(k) \rightarrow P(k + 1)$,
+depende do n\'umero natural $n$), ao se demonstrar a veracidade de $P(0)$, e de $P(k) \Rightarrow P(k + 1)$,
 sendo $k$ um n\'umero natural qualquer, o princ\'ipio da indu\c{c}\~ao matem\'atica afirma que $P(n)$ \'e
 verdadeiro para todo $n$. Neste trabalho, ser\'a usado amplamente uma vers\~ao generalizada desse
 princ\'ipio, conhecida como Indu\c{c}\~ao Transfinita. Nesse caso, deve-se supor que $P(k)$ \'e verdadeiro
@@ -322,7 +351,7 @@ para todo $k < n$. Se essa hip\'otese implicar na veracidade de $P(n)$, ent\~ao,
 Indu\c{c}\~ao Transfinita, obt\^em-se a veracidade de $P(m)$, para todo $m$ natural.
 
 \qquad Eventualmente ser\'a necess\'ario usar a indu\c{c}\~ao com uma hip\'otese da forma $P(f(n))$, para
-algum predicado $P$ e fun\c{c}\~ao $f : \mathbb{N} \rightarrow \mathbb{N}$. Isso \'e v\'alido, desde que se
+algum predicado $P$ e fun\c{c}\~ao $f :: \mathbb{N} \rightarrow \mathbb{N}$. Isso \'e v\'alido, desde que se
 demonstre que $f$ \'e estritamente decrescente. Com essa propriedade, temos a garantia que $f(n) < n$,
 logo a hip\'otese de indu\c{c}\~ao se aplica a $f(n)$. Caso exista algum $n$ tal que $f(n) \geq n$,
 estar\'iamos usando uma hip\'otese que n\~ao temos para demonstrar o teorema, o que \'e inv\'alido.
@@ -336,7 +365,7 @@ assistente, que \'e capaz de determinar se a demonstra\c{c}\~ao \'e v\'alida ou 
 \qquad Assim como muitos outros assistentes, Lean \'e baseado em \textbf{tipos
   dependentes}\cite{typesAtWork}. Ou seja, cada proposi\c{c}\~ao que se enuncia dentro da linguagem \'e
 representada internamente por um tipo, o qual depende de valores de outros tipos. Um exemplo para essa
-id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b : T$, o s\'imbolo ``$=$'' age como
+id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b :: T$, o s\'imbolo ``$=$'' age como
 um construtor de tipos, que toma dois valores do tipo $T$ como par\^ametro e retorna o tipo relativo a
 igualdade entre os dois valores. Nesse contexto, construir um termo do tipo ``$a = b$'' equivale a demonstrar
 a igualdade entre esses dois valores.
@@ -626,15 +655,18 @@ podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'u
   comparisons\_merge(x : xs, ys) =
       \begin{cases}
         comparisons\_insert(x, ys), \text{\qquad \quad \,\, se } ys' = [] \\
-        comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys') + 1, \text{caso contr\'ario}
+        comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys') + 1, \text{caso contr\'ario}\\
+        \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
       \end{cases} \\
-  \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
 \end{split}
 \end{equation}
 
 \chapter{Demonstra\c{c}\~oes Informais}
 
-Nesta se\c{c}\~ao iremos apresentar e demonstar os teoremas necess\'arios
+Nesta se\c{c}\~ao iremos apresentar e demonstrar teoremas que formalizam os seguintes fatos:
+\begin{itemize}
+  \item
+\end{itemize}
 
 
 \section{Insertion Sort}
