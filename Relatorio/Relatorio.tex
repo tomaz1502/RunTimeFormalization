@@ -603,7 +603,7 @@ recebido:
   remove\_prefix(x, y : ys) =
     \begin{cases}
       y : ys, &\text{se } x < y \\
-      remove\_prefix(x, ys) &\text{caso contr\'ario}
+      remove\_prefix(x, ys), &\text{caso contr\'ario}
     \end{cases}
 \end{split}
 \end{equation}
@@ -623,9 +623,12 @@ podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'u
 
 \begin{equation}
 \begin{split}
-  &comparisons\_merge(x : xs, ys) = \\
-  &\text{\quad} comparisons\_insert(x, ys) + comparisons\_merge(xs, ys') \\
-  &\text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
+  comparisons\_merge(x : xs, ys) =
+      \begin{cases}
+        comparisons\_insert(x, ys), \text{\qquad \quad \,\, se } ys' = [] \\
+        comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys') + 1, \text{caso contr\'ario}
+      \end{cases} \\
+  \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
 \end{split}
 \end{equation}
 
