@@ -46,10 +46,13 @@ Universidade Federal de Minas Gerais
 
 \setglossarystyle{altlist}
 
+\newglossaryentry{length}{name = $length(l)$, description={N\'umero de elementos na lista $l$}}
 
-\newglossaryentry{proj2}{name = $proj_{2}(p)$, description={Segundo elemento do par ordenado $p$}}
+\newglossaryentry{proj3}{name = $proj_{3}(p)$, description={Terceiro elemento da tupla ordenada $p$}}
 
-\newglossaryentry{proj1}{name = $proj_{1}(p)$, description={Primeiro elemento do par ordenado $p$}}
+\newglossaryentry{proj2}{name = $proj_{2}(p)$, description={Segundo elemento da tupla ordenada $p$}}
+
+\newglossaryentry{proj1}{name = $proj_{1}(p)$, description={Primeiro elemento da tupla ordenada $p$}}
 
 \newglossaryentry{listindex}{name = $[a]_{i}$, description={$i$-\'esimo elemento da lista $a$}}
 
@@ -303,11 +306,11 @@ entre os elementos da lista que ele est\'a ordenando.
 \qquad Uma vez que a m\'etrica foi explicitada, deve-se encontrar alguma rela\c{c}\~ao entre o seu valor para
 uma entrada espec\'ifica e o tamanho daquela entrada. Por exemplo, no caso dos algoritmos de ordena\c{c}\~ao
 iremos comparar o n\'umero de compara\c{c}\~oes executadas com o n\'umero de elementos da lista de entrada.
-Ser\'a demonstrado que, para uma lista de tamanho $n$, o Insertion Sort nunca utiliza mais do que $n^{2}$ compara\c{c}\~oes, enquanto o Merge Sort n\~ao passa de $8 n \log (n)$. Esses dois fatos,
+Ser\'a demonstrado que, para uma lista de tamanho $n$, o Insertion Sort nunca utiliza mais do que $n^{2}$ compara\c{c}\~oes, enquanto o Merge Sort n\~ao passa de $8 n \log_{2} (n)$. Esses dois fatos,
 juntos com exemplos em que os algoritmos atingem esses limites, mostram que o Merge Sort \'e mais eficiente
 do que o Insertion Sort.
 
-\qquad Na literatura, existem demonstra\c{c}\~oes de que o Merge Sort utiliza menos do que $n\log(n)$
+\qquad Na literatura, existem demonstra\c{c}\~oes de que o Merge Sort utiliza menos do que $n\log_{2}(n)$
 compara\c{c}\~oes no pior caso\cite{1}, o que \'e um limite mais forte do que o apresentado neste trabalho. Contudo, na literatura \'e considerada uma implementa\c{c}\~ao que usa um vetor em vez de uma lista,
 fazendo com que n\~ao seja necess\'ario usar opera\c{c}\~oes para dividir a lista em duas. No caso do Insertion Sort, sabe-se que ele nunca faz mais do
 que $n(n - 1) / 2$ compara\c{c}\~oes, o que \'e um limite um pouco mais forte
@@ -410,7 +413,7 @@ pelos algoritmos. Com isso, demonstraremos que o n\'umero natural retornado pelo
 algoritmo modificado est\'a contando essas compara\c{c}\~oes corretamente. Finalmente,
 demonstraremos um limite para esse n\'umero, em fun\c{c}\~ao do tamanho da lista de entrada.
 Considerando uma lista de tamanho $n$, mostraremos que o Insertion Sort se limita a $n^{2}$
-compara\c{c}\~oes, enquanto o Merge Sort nunca passa de $8 n \log (n)$.
+compara\c{c}\~oes, enquanto o Merge Sort nunca passa de $8 n \log_{2} (n)$.
 
 \section{Insertion Sort}
 
@@ -422,11 +425,11 @@ sua defini\c{c}\~ao \'e dada por meio de casamento de padr\~oes,
 dependendo da forma da lista de entrada. No caso da lista ter mais de um elemento, usamos
 a fun\c{c}\~ao recursivamente.
 
-\begin{equation}
+\begin{equation} \label{ins_base}
 insert(x, []) = [x]
 \end{equation}
 
-\begin{equation}
+\begin{equation} \label{ins_ind}
 insert(x, y : ys) =
   \begin{cases}
     x : y : ys \text{, \qquad\,\,\,\,\, se } x < y\\
@@ -438,11 +441,11 @@ insert(x, y : ys) =
 \qquad A vers\~ao extendida funciona exatamente da mesma forma, mas produz tamb\'em um
 n\'umero natural, que conta o n\'umero de opera\c{c}\~oes realizadas.
 
-\begin{equation}
+\begin{equation} \label{ins_ext_base}
 insert\_extended(x, []) = ([x], 0)
 \end{equation}
 
-\begin{equation}
+\begin{equation} \label{ins_ext_ind}
 insert\_extended(x, y : ys) =
   \begin{cases}
     (x : y : ys, 1) \text{, se } x < y\\
@@ -539,7 +542,7 @@ merge\_extended([], ys) = (ys, 0)
 \begin{equation} \label{merge_ext_3}
 merge\_extended(x : xs, y : ys) =
      \begin{cases}
-       (x : l_{1}, 1 + n) \text{,\qquad se $x < y$} \\
+       (x : l_{1}, 1 + n) \text{,\qquad \, se $x < y$} \\
        % \text{\quad \textbf{onde: }} (l_{1}, n) = merge\_extended(xs, y : ys) \\
        (y : l_{2}, 1 + m) \text{,\qquad caso contr\'ario} \\
        \text{\quad \textbf{onde: }} (l_{1}, n) := merge\_extended(xs, y : ys) \\
@@ -661,16 +664,137 @@ podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'u
 \end{split}
 \end{equation}
 
-\chapter{Demonstra\c{c}\~oes Informais}
+\chapter{Demonstra\c{c}\~oes Convencionais}
 
 Nesta se\c{c}\~ao iremos apresentar e demonstrar teoremas que formalizam os seguintes fatos:
 \begin{itemize}
-  \item
+  \item O primeiro elemento retornado nas defini\c{c}\~oes extendidas \'e igual ao retorno das defini\c{c}\~oes originais correspondentes.
+  \item O segundo elemento retornado nas defini\c{c}\~oes extendidas \'e igual ao retorno das fun\c{c}\~oes de certifica\c{c}\~ao correspondentes.
+  \item O segundo elemento retornado nas defini\c{c}\~oes extendidas \'e limitado por uma fun\c{c}\~ao (a ser especificada) do tamanho da lista de entrada.
 \end{itemize}
 
+\qquad Ao longo dos teoremas, usaremos $A$ para indicar um tipo gen\'erico que possui uma ordem total induzida pelo operador ``$\le$''. Todas as demonstra\c{c}\~oes s\~ao feitas por meio de indu\c{c}\~ao na lista de entrada, portanto, omitiremos essa informa\c{c}\~ao nelas. Usaremos $n$ para indicar $length(l)$, $n_{1}$ para indicar $length(l_{1})$ e $n_{2}$ para indicar $length(l_{2})$.
 
 \section{Insertion Sort}
+
+\newtheorem{teorema}{Teorema}[section]
+
+\begin{teorema}
+  $\forall a :: A, l :: [A], \,\, proj_1(insert\_extended(a, l)) = insert(a, l)$
+\end{teorema}
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+  \textbf{Caso Base: } $l = []$.
+  \begin{align*}
+    proj_{1}(insert\_extended(a, [])) &= proj_{1}([a], 0)  &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}} \\
+                                      &= [a] &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+    &= insert(a, [])  &\text{Pela equa\c{c}\~ao \ref{ins_base}}
+  \end{align*}
+
+  \textbf{Caso Indutivo: } $l = h : t$.
+
+  \textbf{Hip\'otese Indutiva: } $proj_{1}(insert\_extended(a, t)) = insert(a, t)$.
+
+
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{1}(insertion\_sort\_extended(l)) = insertion\_sort(l)$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{2}(insert\_extended(l)) = comparisons\_insert(l)$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{2}(insert\_extended(l)) \le n$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{2}(insertion\_sort\_extended(l)) \le n^{2}$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
 \section{Merge Sort}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_1(split\_extended(l)) = proj_{1}(split(l))$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_2(split\_extended(l)) = proj_{2}(split(l))$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l_{1}, l_{2} :: [A], \,\, proj_1(merge\_extended(l_{1}, l_{2})) = merge(l_{1}, l_{2})$
+\end{teorema}
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{1}(merge\_sort\_extended(l)) = merge\_sort(l)$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{2}(merge\_extended(l)) = comparisons\_merge(l)$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \,\, proj_{3}(split\_extended(l)) \le n$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l_{1}, l_{2} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, l_{2})) \le n_{1} + n_{2}$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
+\begin{teorema}
+  $\forall l :: [A], \, proj_{2}(merge\_sort\_extended(l)) \le 8 n \log_{2}n$
+\end{teorema}
+
+\begin{proof}
+  prova
+\end{proof}
+
 
 \chapter{Formaliza\c{c}\~ao em Lean}
 - Colocando apenas os codigos das fun\c{c}\~oes por enquanto
