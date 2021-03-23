@@ -34,10 +34,7 @@ def remove_prefix (a : α) : list α → list α
 | []        ys        := 0
 | xs        []        := 0
 | (x :: xs) (y :: ys) := comparisons_insert r x (y :: ys) +
-  match remove_prefix r x (y :: ys) with
-  | [] := 0
-  | rest_ys := 1 + comparisons_merge xs rest_ys
-  end
+                         comparisons_merge xs (remove_prefix r x)
 
 theorem comparisons_insert_correct (a : α) : ∀ l : list α,
   (ordered_insert r a l).snd = comparisons_insert r a l :=

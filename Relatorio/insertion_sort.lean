@@ -1,8 +1,8 @@
-def ordered_insert (a : α) : list α → list α
+def insert (a : α) : list α → list α
 | []       := [a]
 | (h :: t) := if a ≼ h then a :: h :: t
-                       else h :: ordered_insert t
+                       else h :: insert t
 
 def insertion_sort : list α → list α
 | []       := []
-| (b :: l) := ordered_insert r b (insertion_sort l)
+| (b :: l) := insert r b (insertion_sort l)

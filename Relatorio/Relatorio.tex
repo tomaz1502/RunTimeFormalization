@@ -29,12 +29,13 @@
 \DeclareUnicodeCharacter{03BB}{$\lambda$}
 \DeclareUnicodeCharacter{2081}{$_1$}
 \DeclareUnicodeCharacter{2082}{$_2$}
+\DeclareUnicodeCharacter{2264}{$\le$}
 
 \titulo
   {Formalização da Complexidade Temporal de Algoritmos de Ordenação em Lean}
 \autor{Tomaz Gomes Mascarenhas}
 \local{Belo Horizonte, Minas Gerais}
-\data{2020}
+\data{2021}
 \orientador{Haniel Barbosa}
 \instituicao{%
 Universidade Federal de Minas Gerais
@@ -105,11 +106,11 @@ si próprios. Formalmente, denotando por $U$ o conjunto de todos os conjuntos, t
 \begin{center}
   $M = \{A\, |\, A\, \in A\}$ \\
   $N = \{A\, |\, A\, \notin A\}$ \\
-  $U = M\, \dot\cup\, N$
+  $U = M\, \cup\, N$
 \end{center}
 
 \qquad Dessa definição surge uma dúvida: $N$ contém a si próprio? Se ele não contiver,
-então, sua definição implicaria que ele deveria se conter. Por outro lado, se $N \in N$ , ele
+então, sua definição implicaria que ele deveria se conter. Por outro lado, se $N \in N$, ele
 estaria contrariando sua definição, já que $N$ só aceita conjuntos que não contém a si
 mesmos. Em ambos os casos, temos uma contradição. Esse é um dos exemplos mais
 famosos de impredicatividade, isto é, um objeto que referencia a si mesmo.
@@ -121,20 +122,20 @@ conjunto conter a si próprio. A classe de número $0$ representa todos os conju
 não possuem conjuntos como elementos. A classe $1$ se referia a todos os conjuntos que,
 se possuírem conjuntos como elementos, estes deverão pertencer a classe $0$. De modo
 geral, conjuntos da classe $i$ só podem conter conjuntos de classes $j$, tal que $j < i$. Desse
-modo, não podem existir conjuntos que contém a si próprios, e o paradoxo deixa de existir.
+modo, não podem existir conjuntos que contém a si próprios e o paradoxo deixa de existir.
 Embora tenha resolvido esse problema, a teoria é menos expressiva do que sua antecessora,
 o que fez com que não fosse amplamente adotada pelos matemáticos.
 
 \qquad Contudo, com o surgimento da Ciência da Computação, as ideias da Teoria dos Tipos
 encontraram uma nova aplicação nas Linguagens de Programação. A maioria delas adota
-algo que é conhecido como Sistema de Tipos. Nas palavras de Pierce\cite{pierce}, ``Um sistema de
+algo que é conhecido como Sistema de Tipos. Nas palavras de Pierce \cite{pierce}, ``Um sistema de
 tipos é um método sintático tratável para demonstrar a isenção de certos comportamentos
-em um programa por meio da classificação de frases de acordo com as espécies de valores
-que elas computam''. Por exemplo, sem um sistema desses, a expressão ``word''+2 poderia
+em um programa por meio da classificação de senten\c{c}as de acordo com as espécies de valores
+que elas computam''. Por exemplo, sem um sistema desses, a expressão \textsf{``word'' + 2} poderia
 ser considerada válida em uma linguagem, embora não esteja claro o que ela quer dizer.
-Atribuindo ao objeto ``word'' o tipo String, ao objeto $2$ o tipo Integer e ao operador
-$+$ a propriedade de que deve ser usado com objetos de mesmo tipo, por exemplo, é
-possível identificar essa expressão como inválida, ainda em tempo de compilação (note a
+Atribuindo ao objeto \textsf{``word''} o tipo String, ao objeto \textsf{2} o tipo Integer e ao operador
+\textsf{+} a propriedade de que deve ser usado com objetos de mesmo tipo, por exemplo, é
+possível identificar essa expressão como inválida estaticamente, isto \'e, sem a necessidade de tentar executar o programa e receber um erro (note a
 semelhança entre essas restrições relacionadas a termos e as restrições estabelecidas por
 Russell, relacionadas a conjuntos).
 
@@ -196,7 +197,7 @@ meio da escrita de programas. Tais demonstrações podem ser verificadas mecanic
 pelo compilador da linguagem, fazendo com que o grau de confiabilidade que elas atinjam
 seja muito superior ao de demonstrações convencionais.
 
-\qquad De acordo com Geuvers\cite{geuvers} (p. 4): ``Uma demonstração matemática pode ser
+\qquad De acordo com Geuvers \cite{geuvers} (p. 4): ``Uma demonstração matemática pode ser
 reduzida a uma série de etapas muito breves que podem ser verificadas de forma sim-
 ples e irrefutável''. Tais etapas são tão pequenas que quase sempre são resumidas em
 demonstrações, e sua corretude fica subentendida. No entanto, é possível que esse resumo
@@ -226,11 +227,11 @@ realizar tal tarefa foi por meio da ajuda de computadores, e, mesmo os mais efic
 época levaram mais de mil horas para isso. O uso desse tipo de técnica foi questionado por
 parte da comunidade matemática, principalmente pelo fato de ser necessário acreditar que
 os softwares utilizados para colorir e gerar os mapas estariam corretos. Anos depois, em
-2005, a demonstração foi formalizada dentro de um assistente de demonstra\c{c}\~ao chamado Coq, fazendo com
+2005, a demonstração foi formalizada dentro de um assistente de demonstra\c{c}\~ao chamado Coq \cite{fourcolor}, fazendo com
 que fosse necessário acreditar apenas que seu kernel estaria correto. Exitem divergências
 quanto ao uso desse tipo de demonstração na matemática, mas a comunidade no geral
-tem se mostrado confiante nessa ferramenta. Por exemplo, 29 participantes de um evento
-relacionado a um assistente chamado Lean se identificaram como matemáticos\cite{hitchhiker} (p. 8).
+tem se mostrado confiante nessa ferramenta. Por exemplo, 29 dos 62 participantes de um evento
+relacionado a um assistente chamado Lean \cite{2} se identificaram como matemáticos \cite{hitchhiker} (p. 8).
 
 \qquad Um outro campo que também tem se beneficiado desse mecanismo é a Engenharia
 de Software. Uma das propriedades mais desejáveis quando se desenvolve programas é a
@@ -294,7 +295,7 @@ do n\'umero $2$ na lista de entrada, e apenas uma na lista de sa\'ida.
 \end{itemize}
 
 \qquad Existem diversos algoritmos de ordena\c{c}\~ao conhecidos. Esse trabalho ir\'a se restringir ao
-Insertion Sort e o Merge Sort\cite{1}. Essa escolha foi feita por causa de restri\c{c}\~oes de tempo para
+Insertion Sort e o Merge Sort \cite{1}. Essa escolha foi feita por causa de restri\c{c}\~oes de tempo para
 o trabalho, e pelo fato de, esses dois serem os \'unicos algoritmos de ordena\c{c}\~ao
 formalizados pela biblioteca do Lean, o que os torna os mais interessantes do ponto de vista
 da comunidade do assistente.
@@ -320,7 +321,7 @@ juntos com exemplos em que os algoritmos atingem esses limites, mostram que o Me
 do que o Insertion Sort.
 
 \qquad Na literatura, existem demonstra\c{c}\~oes de que o Merge Sort utiliza menos do que $n\log_{2}(n)$
-compara\c{c}\~oes no pior caso\cite{1}, o que \'e um limite mais forte do que o apresentado neste trabalho.
+compara\c{c}\~oes no pior caso \cite{1}, o que \'e um limite mais forte do que o apresentado neste trabalho.
 Contudo, na literatura \'e considerada uma implementa\c{c}\~ao que usa um vetor em vez de uma lista,
 fazendo com que n\~ao seja necess\'ario usar opera\c{c}\~oes para dividir a lista em duas. No caso do Insertion
 Sort, sabe-se que ele nunca faz mais do
@@ -372,12 +373,12 @@ estar\'iamos usando uma hip\'otese que n\~ao temos para demonstrar o teorema, o 
 
 \section{Lean}
 
-\qquad Lean\cite{2} \'e um assistente de demonstra\c{c}\~oes. Estes s\~ao linguagens de programa\c{c}\~ao que
+\qquad Lean \cite{2} \'e um assistente de demonstra\c{c}\~oes. Estes s\~ao linguagens de programa\c{c}\~ao que
 possibilitam que seu usu\'ario enuncie e demonstre teoremas, os quais s\~ao verificados pelo compilador do
 assistente, que \'e capaz de determinar se a demonstra\c{c}\~ao \'e v\'alida ou n\~ao.
 
 \qquad Assim como muitos outros assistentes, Lean \'e baseado em \textbf{tipos
-  dependentes}\cite{typesAtWork}. Ou seja, cada proposi\c{c}\~ao que se enuncia dentro da linguagem \'e
+  dependentes} \cite{typesAtWork}. Ou seja, cada proposi\c{c}\~ao que se enuncia dentro da linguagem \'e
 representada internamente por um tipo, o qual depende de valores de outros tipos. Um exemplo para essa
 id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b :: T$, o s\'imbolo ``$=$'' age como
 um construtor de tipos, que toma dois valores do tipo $T$ como par\^ametro e retorna o tipo relativo a
@@ -395,14 +396,14 @@ Lean fornece abstra\c{c}\~oes ao usu\'ario para que o processo de demonstrar teo
 convencional. Tais abstra\c{c}\~oes s\~ao conhecidas como t\'aticas. Al\'em de prover as t\'aticas
 correspondentes as t\'ecnicas de demonstra\c{c}\~ao mais comuns (como indu\c{c}\~ao, demonstra\c{c}\~ao por
 contradi\c{c}\~ao, etc.), o assistente tamb\'em permite que o usu\'ario desenvolva suas pr\'oprias t\'aticas, por
-meio de metaprograma\c{c}\~ao\cite{metaprog}.
+meio de metaprograma\c{c}\~ao \cite{metaprog}.
 
 \qquad Lean tamb\'em apresenta um certo n\'ivel de automatiza\c{c}\~ao de demonstra\c{c}\~oes. Dado um certo fato
 que deseja-se demonstrar, \'e poss\'ivel requisitar ao assistente que se pesquise na biblioteca de teoremas j\'a
 demonstrados alguma combina\c{c}\~ao que, ou sirva como demonstra\c{c}\~ao direta do que se pretende demonstrar,
 ou funcione como uma etapa intermedi\'aria, simplificando o fato a ser demonstrado. Tal funcionalidade \'e
 especialmente \'util se usada em conjunto com a biblioteca mantida pela comunidade, conhecida como
-mathlib\cite{3}. Nela s\~ao mantidas formaliza\c{c}\~oes extensas de diversas \'areas da matem\'atica e da
+\textit{mathlib} \cite{3}. Nela s\~ao mantidas formaliza\c{c}\~oes extensas de diversas \'areas da matem\'atica e da
 computa\c{c}\~ao, as quais podem ser usadas livremente para ajudar nas demonstra\c{c}\~oes de teoremas que o
 usu\'ario desejar. Em particular, nessa biblioteca existe a formaliza\c{c}\~ao dos algoritmos de ordena\c{c}\~ao,
 as quais ser\~ao usadas ao longo deste trabalho. Tais formaliza\c{c}\~oes
@@ -423,7 +424,7 @@ demonstra\c{c}\~ao:
 temporal de dois algoritmos: Insertion Sort e Merge Sort. Nessa se\c{c}\~ao
 eles ser\~ao definidos em linguagem matem\'atica.
 
-\qquad A defini\c{c}\~ao original desses algoritmos (que \'e usada pela mathlib)
+\qquad A defini\c{c}\~ao original desses algoritmos (que \'e usada pela \textit{mathlib})
 n\~ao registra a quantidade de compara\c{c}\~oes que
 s\~ao feitas, o que torna imposs\'ivel que se demonstre
 teoremas sobre esses n\'umeros. Por causa
@@ -432,7 +433,7 @@ n\'umeros naturais que determinam o n\'umero de opera\c{c}\~oes executadas.
 
 \qquad Este trabalho ir\'a apresentar demonstra\c{c}\~oes que as listas
 produzidas por essas novas fun\c{c}\~oes s\~ao id\^enticas \`as produzidas pelas
-fun\c{c}\~oes definidas originalmente, assumindo que elas receberam a mesma entrada. Al\'em
+fun\c{c}\~oes definidas originalmente, dado que elas receberam a mesma entrada. Al\'em
 disso, ser\~ao definidas fun\c{c}\~oes que usam a estrutura da lista para
 determinar exatamente quantas compara\c{c}\~oes s\~ao efetivamente realizadas
 pelos algoritmos. Com isso, demonstraremos que o n\'umero natural retornado pelo
@@ -464,7 +465,7 @@ insert(x, y : ys) =
 \end{equation}
 
 \newpage
-\qquad A vers\~ao extendida funciona exatamente da mesma forma, mas produz tamb\'em um
+\qquad A vers\~ao estendida funciona exatamente da mesma forma, mas produz tamb\'em um
 n\'umero natural, que conta o n\'umero de opera\c{c}\~oes realizadas.
 
 \begin{equation} \label{ins_ext_base}
@@ -537,7 +538,7 @@ split([]) = ([], [])
 \end{equation}
 
 
-\qquad A segunda fun\c{c}ao auxiliar, que chamamos de $merge$, recebe duas listas
+\qquad A segunda fun\c{c}\~ao auxiliar, que chamamos de $merge$, recebe duas listas
 ordenadas e produz uma nova lista, intercalando todos os elementos das listas
 de entrada, de modo que a lista final esteja ordenada. As equa\c{c}\~oes \ref{merge_1},
 \ref{merge_2} e \ref{merge_3} s\~ao sua vers\~ao original, e as equa\c{c}\~oes
@@ -646,7 +647,7 @@ para produzir o n\'umero exato de compara\c{c}\~oes:
 
 
 \qquad No caso do $merge$, para cada elemento da primeira lista, devemos encontrar o primeiro
-elemento da segunda que n\~ao \'e menor do ele. Ao encontrarmos, repetimos o processo com o pr\'oximo
+elemento da segunda que n\~ao \'e menor do que ele. Ao encontrarmos, repetimos o processo com o pr\'oximo
 elemento da primeira lista e o sufixo que sobrou da segunda lista. A seguir, definimos uma
 fun\c{c}\~ao auxiliar para contar as opera\c{c}\~oes do $merge$. Ela
 recebe um elemento e uma lista ordenada, e remove o prefixo da lista que \'e menor do que o elemento
@@ -1205,7 +1206,7 @@ $proj_{2}(merge\_sort\_extended(h : h' : t'))$
   &= proj_{2}(\star, q + m_{1} + m_{2} + p) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
   &= q + e_{1} + e_{2} + p &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
   &= q + e_{1} + e_{2} + n &\text{Pelo teorema \ref{split_time}}\\
-  &\le length(l_{1}) + length(l_{2}) + e_{1} + e_{2} + n &\text{Pelo teorema \ref{merge_time}}\\
+  &\le m_{1} + m_{2} + e_{1} + e_{2} + n &\text{Pelo teorema \ref{merge_time}}\\
   &= n + e_{1} + e_{2} + n\\
   &\le 2n + 8m_{1}\log_{2}(m_{1}) + 8m_{2}\log_{2}(m_{2}) &\text{Por HI}\\
   &\le 2n + 8\ceil*{\frac{n}{2}}\log_{2}(\ceil*{\frac{n}{2}}) + 8\floor*{\frac{n}{2}}\log_{2}(\floor*{\frac{n}{2}}) &\text{Pelo lema \ref{split_half}}\\
@@ -1216,7 +1217,7 @@ $proj_{2}(merge\_sort\_extended(h : h' : t'))$
   &= 8n\log_{2}(n)
 \end{align*}
 
-Observe que na d\'ecima linha estamos usando $4\log_{2}(n) \le 2n$. Isso vale desde que $2 \le n$, mas este \'e o caso, j\'a que $n$ \'e o tamanho de uma lista com pelo menos 2 elementos. Al\'em disso, na quarta linha estamos usando o fato da soma dos tamanhos das duas listas geradas por $split$ ser igual ao tamanho da lista original, o que \'e simples de ser verificado usando indu\c{c}\~ao.
+Observe que na d\'ecima linha estamos usando $4\log_{2}(n) \le 2n$. Al\'em disso, na quarta linha estamos usando o fato da soma dos tamanhos das duas listas geradas por $split$ ser igual ao tamanho da lista original, o que \'e simples de ser verificado usando indu\c{c}\~ao.
 
 \qed
 
@@ -1342,18 +1343,78 @@ como $h_{1} \not \le h_{2}$, vale que $comparisons\_insert(h_{1}, h_{2} : t_{2})
 \qed
 
 
-\chapter{Formaliza\c{c}\~ao em Lean}
-- Colocando apenas os codigos das fun\c{c}\~oes por enquanto
+\chapter{Formaliza\c{c}\~oes em Lean}
+
+Nessa se\c{c}\~ao iremos definir as fun\c{c}\~oes da se\c{c}\~ao 3 usando Lean. Al\'em disso, apresentaremos o c\'odigo do enunciado dos principais teoremas da se\c{c}\~ao 4 em Lean, assim como as principais t\'aticas usadas para demonstr\'a-los. O argumento de todas as demonstra\c{c}\~oes em Lean \'e essencialmente o mesmo da se\c{c}\~ao 4.
+
+As seguintes declara\c{c}\~oes informam ao compilador do Lean que usaremos $\alpha$ como um tipo gen\'erico ao longo das defini\c{c}\~oes, e que \textsf{r} \'e uma rela\c{c}\~ao entre elementos de $\alpha$. A segunda linha est\'a definindo o operador \textsf{$\preceq$} como um alias para a rela\c{c}\~ao \textsf{r}. A senten\c{c}a\\ \textsf{[decidable\_rel r]} \'e usada para restringir \textsf{r} \`{a}s rela\c{c}\~oes que s\~ao decid\'iveis, isto \'e, para quaisquer \textsf{a, b : $\alpha$},
+\textsf{a $\preceq$ b} nunca \'e indefinido, sendo sempre verdadeiro ou falso. Isto \'e
+necess\'ario pois, como foi argumentado, \textsf{r} deve sempre ser uma rela\c{c}\~ao de
+ordem total. Uma poss\'ivel melhoria seria implementar as outras restri\c{c}\~oes que limitariam \textsf{r} para apenas rela\c{c}\~oes de ordem total. Tais restri\c{c}\~oes n\~ao s\~ao implementadas na \textit{mathlib}.
 
 \inputminted{lean}{declarations.lean}
-\section{Insertion Sort}
+
+\section{Fun\c{c}\~oes}
+
+\subsection{Insertion Sort}
+
+As seguintes defini\c{c}\~oes correspondem a implementa\c{c}\~ao das duas vers\~oes do
+Insert e Insertion Sort em Lean (equa\c{c}\~oes~\ref{ins_base}
+at\'e~\ref{ins_sort_ext_ind}). Na primeira linha de cada uma, temos o nome da
+fun\c{c}\~ao, seguido pelo seu tipo. Nas linhas seguintes temos sua defini\c{c}\~ao
+definida por meio do casamento de padr\~oes com a lista de entrada.
+
 \inputminted{lean}{insertion_sort.lean}
 \inputminted{lean}{insertion_sort_modified.lean}
 
-\section{Merge Sort}
+\subsection{Merge Sort}
+
+As pr\'oximas defini\c{c}\~oes correspondem a implementa\c{c}\~ao das duas
+vers\~oes do Merge Sort e suas fun\c{c}\~oes auxiliares em Lean
+(equa\c{c}\~oes~\ref{merge_1} at\'e~\ref{ms_ext_3}).
+
+
+Nas duas vers\~oes do Merge Sort foi necess\'ario usar o modo de t\'aticas do Lean.
+Esse modo, usualmente usado para demonstrar teoremas, permite que o usu\'ario use
+algumas express\~oes especiais para ajudar na defini\c{c}\~ao que est\'a sendo
+feita. No caso do Merge Sort, ele foi usado pois fazemos recurs\~ao na lista gerada
+pela fun\c{c}\~ao split. Nesse caso, \'e necess\'ario fornecer ao compilador uma
+demonstra\c{c}\~ao que essa recurs\~ao ir\'a, eventualmente, terminar. Para isso,
+antes de definir o que ser\'a retornado, usamos o lema \textsf{length\_split\_lt} (que afirma que o tamanho da lista produzida por \textsf{split} \'e menor do que o tamanho da lista original), juntamente com o comando \textsf{using\_well\_founded}, para indicar ao compilador que a m\'etrica usada para determinar o fim da recurs\~ao \'e o tamanho da lista.
 
 \inputminted{lean}{merge_sort.lean}
 \inputminted{lean}{merge_sort_modified.lean}
+
+\subsection{Certifica\c{c}\~ao}
+
+As seguintes fun\c{c}\~oes s\~ao as vers\~oes em Lean correspondentes \`as
+equa\c{c}\~oes usadas para certifica\c{c}\~ao (equa\c{c}\~oes~\ref{comp_ins_base} at\'e~\ref{comp_merge_ind})
+
+\inputminted{lean}{ins_comp.lean}
+\inputminted{lean}{remove_pref.lean}
+\inputminted{lean}{merge_comp.lean}
+
+\section{Teoremas}
+
+\subsection{Insertion Sort}
+
+\inputminted{lean}{ins_complexity.lean}
+
+Note: \textsf{.snd} equivale a fun\c{c}\~ao $proj_{2}$ que estamos usando.
+
+Equivalente ao teorema~\ref{count_ins}. A t\'atica \textsf{induction} \'e usada
+ para iniciar uma demonstra\c{c}\~ao por indu\c{c}\~ao. No passo indutivo,
+usa-se a t\'atica
+\textsf{split\_ifs} para dividir entre os casos \textsf{$a \le h$} e \textsf{$a
+\not \le h$}. Por causa do \textsf{let} usado na defini\c{c}\~ao do
+\textsf{insert\_extended}, \'e necess\'ario usar a t\'atica \textsf{cases},
+que troca a chamada recursiva \textsf{insert\_extended t} pelo par \textsf{(l',
+  n)}, seguido pela t\'atica \textsf{unfold}, que reescreve a defini\c{c}\~ao de
+\textsf{insert\_extended}. A t\'atica \textsf{linarith} \'e usada quando \'e necess\'ario apenas realizar c\'alculos para completar a demonstra\c{c}\~ao.
+
+\subsection{Merge Sort}
+
+\subsection{Certifica\c{c}\~ao}
 
 \chapter{Conclus\~ao}
 
