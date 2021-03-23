@@ -19,7 +19,9 @@
 \usepackage{proof}
 \usepackage{amsmath,amsfonts,amsthm,bm}
 % \usepackage[nonumberlist,style=index,nomain]{glossaries}%
-
+\usepackage{mathtools}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclareUnicodeCharacter{2200}{$\mathbb{\forall}$}
 \DeclareUnicodeCharacter{227C}{$\preceq$}
 \DeclareUnicodeCharacter{03B1}{$\alpha$}
@@ -678,15 +680,22 @@ podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'u
 \end{equation}
 
 \begin{equation} \label{comp_merge_ind}
-\begin{split}
-  comparisons\_merge(x : xs, ys) =
-      \begin{cases}
-        comparisons\_insert(x, ys), \text{\qquad \quad \,\, se } ys' = [] \\
-        comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys') + 1, \text{caso contr\'ario}\\
-        \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
-      \end{cases} \\
-\end{split}
+  \begin{split}
+  comparisons\_merge(x : xs, ys) &= comparisons\_insert(x, ys) + comparisons\_merge(xs, ys')\\
+  \text{\textbf{onde: }} ys' &:= remove\_prefix(x, ys)
+  \end{split}
 \end{equation}
+
+% \begin{equation} \label{comp_merge_ind}
+% \begin{split}
+%   comparisons\_merge(x : xs, ys) =
+%       \begin{cases}
+%         comparisons\_insert(x, ys), &\text{se } ys' = [] \\
+%         comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys'), &\text{caso contr\'ario}\\
+%         \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
+%       \end{cases} \\
+% \end{split}
+% \end{equation}
 
 \chapter{Demonstra\c{c}\~oes Convencionais}
 
@@ -698,13 +707,15 @@ Nesta se\c{c}\~ao iremos apresentar e demonstrar, de forma convencional, teorema
 \end{itemize}
 
 \qquad Ao longo dos teoremas, usaremos $A$ para indicar um tipo gen\'erico que possui uma ordem total induzida pelo
-operador ``$\le$''. Todas as demonstra\c{c}\~oes s\~ao feitas por meio de indu\c{c}\~ao na lista de entrada,
+operador ``$\le$''. Quase todas as demonstra\c{c}\~oes s\~ao feitas por meio de indu\c{c}\~ao na lista de entrada,
 portanto, omitiremos essa informa\c{c}\~ao nelas. Sempre usaremos $n$ para indicar $length(l)$, $n_{1}$ para indicar
 $length(l_{1})$ e $n_{2}$ para indicar $length(l_{2})$.
 
 \section{Insertion Sort}
 
 \newtheorem{teorema}{Teorema}[section]
+
+\newtheorem{lema}{Lema}[section]
 
 \begin{teorema} \label{insert_eq}
   $\forall a :: A, l :: [A], \,\, proj_1(insert\_extended(a, l)) = insert(a, l)$
@@ -843,7 +854,7 @@ $proj_{2}(insertion\_sort\_extended(h : t))$
 
 \section{Merge Sort}
 
-\begin{teorema}
+\begin{teorema}\label{split_eq}
   $\forall l :: [A], \,\, proj_{1,2}(split\_extended(l)) = split(l)$
 \end{teorema}
 
@@ -873,7 +884,7 @@ No \'ultimo termo, $t'$ indica alguma lista tal que $split(t') = (l_{1}, l_{2})$
 
 \qed
 
-\begin{teorema}
+\begin{teorema}\label{merge_eq}
   $\forall l_{1}, l_{2} :: [A], \,\, proj_1(merge\_extended(l_{1}, l_{2})) = merge(l_{1}, l_{2})$
 \end{teorema}
 
@@ -921,22 +932,136 @@ Observe que, na terceira igualdade estamos usando a primeira hip\'otese de indu\
 
 \qed
 
-\begin{teorema}
+Os seguintes lemas ser\~ao \'uteis em alguns dos pr\'oximos teoremas:
+
+\begin{lema} \label{split_le}
+  $\forall l :: [A], \,\, length(proj_{1}(split\_extended(l))) \le length(l)\, \wedge$
+
+  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(split\_extended(l))) \le length(l)$
+\end{lema}
+
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+\textbf{Passo Base: } $l = []$
+
+\begin{align*}
+  length(proj_{1}(split\_extended([]))) &= length(proj_{1}([], \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}}\\
+                                        &= length([]) &\text{Pela defini\c{c}\~ao de $proj_{1}$ }\\
+  &= 0 &\text{Pela defini\c{c}\~ao de $length$}\\
+\end{align*}
+
+A demonstra\c{c}\~ao do segundo item \'e an\'aloga.
+
+\textbf{Passo Indutivo: } $l = h : t$
+
+\textbf{Hip\'otese Indutiva: } $length(proj_{1}(split\_extended(t))) \le length(t)\, \wedge$
+
+\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\,  $length(proj_{2}(split\_extended(t))) \le length(t)$
+
+
+Note: definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$
+
+
+$length(proj_{1}(split\_extended(h : t)))$
+\begin{align*}
+  &= length(proj_{1}(h : l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}} \\
+  &= length(h : l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= 1 + length(l_{2}) &\text{Pela defini\c{c}\~ao de $length$}\\
+  &\le 1 + length(t) &\text{Por HI}\\
+  &= length(h : t) &\text{Pela defini\c{c}\~ao de $length$}
+\end{align*}
+
+A demonstra\c{c}\~ao do segundo item \'e an\'aloga.
+\qed
+
+\begin{lema} \label{split_lt}
+  $\forall h_{1}, h_{2} :: A, t :: [T],$
+
+  \qquad $length(proj_{1}(split\_extended(h_{1} : h_{2} : t))) < length(h_{1} : h_{2} : t)$
+\end{lema}
+
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+Note: esta \'e a \'unica demonstra\c{c}\~ao que n\~ao usa indu\c{c}\~ao.
+
+Definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$
+
+\begin{align*}
+  length(proj_{1}(split\_extended(h_{1} : h_{2} : t))) &= length(proj_{1}(h_{1} : l_{1}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
+                                                       &= length(h_{1} : l_{1}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+                                                       &= 1 + length(l_{1}) &\text{Pela defini\c{c}\~ao de $length$}\\
+                                                       &\le 1 + length(t) &\text{Pela lema \ref{split_le}}\\
+                                                       &< 2 + length(t)\\
+  &= length(h_{1} : h_{2} : t) &\text{Pela defini\c{c}\~ao de $length$}
+\end{align*}
+
+\qed
+
+\begin{lema}
+  $\forall h_{1}, h_{2} :: A, t :: [T],$
+
+  \qquad $length(proj_{2}(split\_extended(h_{1} : h_{2} : t))) < length(h_{1} : h_{2} : t)$
+\end{lema}
+
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+An\'aloga a do lema anterior.
+
+\begin{teorema} \label{merge_sort_eq}
   $\forall l :: [A], \,\, proj_{1}(merge\_sort\_extended(l)) = merge\_sort(l)$
 \end{teorema}
 
-\begin{proof}
-  prova
-\end{proof}
+\noindent \textit{Demonstra\c{c}\~ao.}
 
-\begin{teorema}
+
+Caso 1:  $l = []$
+\begin{align*}
+  proj_{1}(merge\_sort\_extended([])) &= proj_{1}([], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_1}}\\
+                                      &= [] &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= merge\_sort([]) &\text{Pela equa\c{c}\~ao \ref{ms_1}}
+\end{align*}
+
+Caso 2:  $l = [h]$
+\begin{align*}
+  proj_{1}(merge\_sort\_extended([h])) &= proj_{1}([h], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
+                                      &= [h] &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= merge\_sort([h]) &\text{Pela equa\c{c}\~ao \ref{ms_2}}
+\end{align*}
+
+Caso 3: $l = h_{1} : h_{2} : t$
+
+Note: definimos
+\begin{center}
+$(l'_{1}, l'_{2}) := split(l)$\\
+$(l_{1}, l_{2}, \star) := split\_extended(l)$\\
+$(ls_{1}, \star) := merge\_sort\_extended(l_{1})$\\
+$(ls_{2}, \star) := merge\_sort\_extended(l_{2})$
+\end{center}
+
+Para demonstrar esse caso, ser\'a necess\'ario usar a indu\c{c}\~ao transfinita, apresentada na se\c{c}\~ao 2.
+Considere o predicado $P(m)$ sendo $\forall l :: [A], \,\, length(l) = m \rightarrow \\ proj_{1}(merge\_sort\_extended(l)) =
+merge\_sort(l)$. O teorema \ref{merge_sort_eq} equivale  a $\forall m, P(m)$. Vamos assumir que o teorema vale para toda
+lista que tem tamanho menor que $l$. Isso implica que ele vale para $l_{1}$ e $l_{2}$, pois o lema \ref{split_lt} afirma
+que a fun\c{c}\~ao $split$ diminui o tamanho de listas que tem pelo menos 2 elementos.\\
+
+$proj_{1}(merge\_sort\_extended(h_{1} : h_{2} : t))$
+\begin{align*}
+  &= proj_{1}(merge\_extended(ls_{1}, ls_{2})) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
+  &= merge(ls_{1}, ls_{2}) &\text{Pelo teorema \ref{merge_eq}}\\
+  &= merge(merge\_sort(l_{1}), merge\_sort(l_{2})) &\text{Por HI}\\
+  &= merge(merge\_sort(l'_{1}), merge\_sort(l'_{2})) &\text{Pelo teorema \ref{split_eq}}\\
+  &= merge\_sort(h_{1} : h_{2} : t) &\text{Pela equa\c{c}\~ao \ref{ms_3}}
+\end{align*}
+
+\qed
+
+\begin{teorema}\label{split_time}
   $\forall l :: [A], \,\, proj_{3}(split\_extended(l)) = n$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l = []$
-
 \begin{align*}
   proj_{3}(split\_extended([])) &= proj_{3}([], [], 0) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}} \\
   &= 0 &\text{Pela defini\c{c}\~ao de $proj_{3}$}
@@ -958,7 +1083,7 @@ Note: definimos $m := proj_{3}(split\_extended(t))$
 
 \qed
 
-\begin{teorema}
+\begin{teorema} \label{merge_time}
   $\forall l_{1}, l_{2} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, l_{2})) \le n_{1} + n_{2}$
 \end{teorema}
 
@@ -977,7 +1102,7 @@ Note: definimos $m := proj_{3}(split\_extended(t))$
 
 Mais uma vez, para demonstrar o passo indutivo, usaremos indu\c{c}\~ao na segunda lista.
 
-\textbf{Passo Base 2: } $l_{2} = 0$
+\textbf{Passo Base 2: } $l_{2} = []$
 \begin{align*}
   proj_{2}(merge\_extended(h_{1} : t_{1}, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}}\\
                                                &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
@@ -1003,13 +1128,97 @@ Observe que, na terceira igualdade estamos usando a primeira hip\'otese de indu\
 
 \qed
 
-\begin{teorema}
-  $\forall l :: [A], \, proj_{2}(merge\_sort\_extended(l)) \le 8 n \log_{2}n$
-\end{teorema}
+Para demonstrar o pr\'oximo teorema, vamos precisar do seguinte lema:
 
-\begin{proof}
-  prova
-\end{proof}
+\begin{lema}\label{split_half}
+  $\forall l :: [A], \,\, length(proj_{1}(split\_extended(l))) \le \ceil{\frac{n}{2}}\,\, \wedge$
+
+  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(split\_extended(l))) \le \floor{\frac{n}{2}}$
+\end{lema}
+
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+\textbf{Passo Base: } $l = []$
+
+$length(proj_{1}(split\_extended([])))$
+\begin{align*}
+  &= length(proj_{1}([], \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}}\\
+  &= length([]) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= 0 &\text{Pela defini\c{c}\~ao de $length$}
+\end{align*}
+
+A demonstra\c{c}\~ao da segunda desigualdade \'e an\'aloga.
+
+\textbf{Passo Indutivo: } $l = h : t$; $n = 1 + n'$
+
+\textbf{Hip\'otese Indutiva: } $length(proj_{1}(split\_extended(t))) \le \ceil{\frac{n'}{2}} \,\, \wedge$
+
+\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\, $length(proj_{2}(split\_extended(t))) \le \floor{\frac{n'}{2}}$
+
+Note: definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$\\
+
+$length(proj_{1}(split\_extended(h : t)))$
+\begin{align*}
+  &= length(proj_{1}(h : l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
+  &= length(h : l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= 1 + length(l_{2}) &\text{Pela defini\c{c}\~ao de $length$}\\
+  &\le 1 + \floor*{\frac{n'}{2}} &\text{Por HI}\\
+  &= \floor*{\frac{n' + 2}{2}}\\
+  &= \floor*{\frac{n + 1}{2}} &\text{Pela defini\c{c}\~ao de $n'$}\\
+  &= \ceil*{\frac{n}{2}}
+\end{align*}
+
+A demonstra\c{c}\~ao da segunda desigualdade \'e an\'aloga.
+
+\qed
+
+\begin{teorema}
+  $\forall h :: A, t :: [A], \, proj_{2}(merge\_sort\_extended(h : t)) \le 8 n \log_{2}n$
+\end{teorema}
+(nesse caso, $n$ = $lenght(h : t)$)\\
+
+\noindent \textit{Demonstra\c{c}\~ao.}
+
+Caso 1: $t = []$
+\begin{align*}
+  proj_{2}(merge\_sort\_extended([h])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
+                                      &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
+  &\le 8 * 1 * log_{2}(1)
+\end{align*}
+
+Caso 2: $t = h' : t'$
+
+Usaremos o mesmo argumento do teorema \ref{merge_sort_eq} para usar a hip\'otese indutiva em $proj_{1}(split\_extended(h : h' : t'))$ e $proj_{2}(split\_extended(h : h' : t'))$.
+
+Note: definimos
+\begin{center}
+  $(l_{1}, l_{2}, p) := split\_extended(h : h' : t')$\\
+  $m_{1} := length(l_{1})$\\
+  $m_{2} := length(l_{2})$\\
+  $e_{1} := proj_{2}(merge\_sort\_extended(l_{1}))$\\
+  $e_{2} := proj_{2}(merge\_sort\_extended(l_{2}))$\\
+  $q := proj_{2}(merge\_extended(l_{1}, l_{2}))$\\
+\end{center}
+
+$proj_{2}(merge\_sort\_extended(h : h' : t'))$
+\begin{align*}
+  &= proj_{2}(\star, q + m_{1} + m_{2} + p) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
+  &= q + e_{1} + e_{2} + p &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
+  &= q + e_{1} + e_{2} + n &\text{Pelo teorema \ref{split_time}}\\
+  &\le length(l_{1}) + length(l_{2}) + e_{1} + e_{2} + n &\text{Pelo teorema \ref{merge_time}}\\
+  &= n + e_{1} + e_{2} + n\\
+  &\le 2n + 8m_{1}\log_{2}(m_{1}) + 8m_{2}\log_{2}(m_{2}) &\text{Por HI}\\
+  &\le 2n + 8\ceil*{\frac{n}{2}}\log_{2}(\ceil*{\frac{n}{2}}) + 8\floor*{\frac{n}{2}}\log_{2}(\floor*{\frac{n}{2}}) &\text{Pelo lema \ref{split_half}}\\
+  &\le 2n + 8(\frac{n + 1}{2})\log_{2}(\frac{n + 1}{2}) + 8(\frac{n}{2})\log_{2}(\frac{n}{2}) \\
+  &\le 2n + 4n\log_{2}(n) + 4\log_{2}(n) + 4n(\log_{2}(n) - 1)\\
+  &\le 2n + 4n\log_{2}(n) + 2n + 4n(\log_{2}(n) - 1)\\
+  &= 4n\log_{2}(n) + 4n\log_{2}(n) - 4n + 4n\\
+  &= 8n\log_{2}(n)
+\end{align*}
+
+Observe que na d\'ecima linha estamos usando $4\log_{2}(n) \le 2n$. Isso vale desde que $2 \le n$, mas este \'e o caso, j\'a que $n$ \'e o tamanho de uma lista com pelo menos 2 elementos. Al\'em disso, na quarta linha estamos usando o fato da soma dos tamanhos das duas listas geradas por $split$ ser igual ao tamanho da lista original, o que \'e simples de ser verificado usando indu\c{c}\~ao.
+
+\qed
 
 \section{Certifica\c{c}\~oes}
 
@@ -1059,23 +1268,29 @@ $proj_{2}(insert\_extended(a, h : t))$
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
-\textbf{Passo Base: } $l_{1} = []$
+\textbf{Passo Base: } $l_{1} = []$\\
 
+$proj_{2}(merge\_extended([], l_{2}))$
 \begin{align*}
-  proj_{2}(merge\_extended([], l_{2})) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}} \\
+  &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}} \\
                                        &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
   &= comparisons\_merge([], l_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_2}} \\
 \end{align*}
 
 \textbf{Passo Indutivo: } $l_{1} = h_{1} : t_{1}$
 
-\textbf{Hip\'otese Indutiva: } $l_{1} = h_{1} : t_{1}$
+\textbf{Hip\'otese Indutiva: }
+
+
+\qquad $\forall l_{2} :: [A], \,\, proj_{2}(merge\_extended(t_{1}, l_{2})) = comparisons\_merge(t_{1}, l_{2})$ \\
 
 Para demonstrar a hip\'otese indutiva faremos indu\c{c}\~ao em $l_{2}$.
 
-\textbf{Passo Base 2: } $l_{2} = []$
+\textbf{Passo Base 2: } $l_{2} = []$\\
+
+$proj_{2}(merge\_extended(h_{1} : t_{1}, []))$
 \begin{align*}
-  proj_{2}(merge\_extended(h_{1} : t_{1}, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}} \\
+   &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}} \\
                                                &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
   &= comparisons\_merge(h_{1} : t_{1}, []) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_1}}
 \end{align*}
@@ -1084,11 +1299,17 @@ Para demonstrar a hip\'otese indutiva faremos indu\c{c}\~ao em $l_{2}$.
 
 \textbf{Hip\'otese Indutiva 2: }
 
-\qquad $\forall l_{1} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, t_{2})) = comparisons\_merge(l_{1}, t_{1})$ \\
+\qquad $\forall l_{1} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, t_{2})) = comparisons\_merge(l_{1}, t_{2})$ \\
 
-Note: definimos $m_{1} = proj_{2}(merge\_extended(t_{1}, h_{2} : t_{2}))$
+Note: definimos
+\begin{center}
+$m_{1} := proj_{2}(merge\_extended(t_{1}, h_{2} : t_{2}))$\\
+$m_{2} := proj_{2}(merge\_extended(h_{1} : t_{1}, t_{2}))$\\
+$r_{1} := remove\_prefix(h_{1}, h_{2} : t_{2})$\\
+$r_{2} := remove\_prefix(h_{1}, t_{2})$
+\end{center}
 
-Caso 1: $remove\_prefix(h_{1}, h_{2} : t_{2}) = []$\\
+Caso 1: $h_{1} \le h_{2}$\\
 
 $proj_{2}(merge\_extended(h_{1} : t_{1}, h_{2} : t_{2}))$
 \begin{align*}
@@ -1097,6 +1318,26 @@ $proj_{2}(merge\_extended(h_{1} : t_{1}, h_{2} : t_{2}))$
    &= 1 + comparisons\_merge(t_{1}, h_{2} : t_{2}) &\text{Por HI} \\
   &= comparisons\_merge(h_{1} : t_{1}, h_{2} : t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
 \end{align*}
+
+Na terceira igualdade estamos usando a primeira hip\'otese indutiva com $l_{2} = h_{2} : t_{2}$. Como $h_{1} \le h_{2}$, temos $comparisons\_insert(h_{1}, h_{2} : t_{2}) = 1$ e $remove\_prefix(h_{1}, h_{2} : t_{2}) = h_{2} : t_{2}$, logo a \'ultima
+igualdade vale. \\
+
+
+Caso 2: $h_{1} \not \le h_{2}$\\
+
+$proj_{2}(merge\_exteded(h_{1} : t_{1}, h_{2} : t_{2}))$
+\begin{align*}
+  &= proj_{2}(\star, 1 + m_{2}) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}}\\
+  &= 1 + m_{2} &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
+  &= 1 + comparisons\_merge(h_{1} : t_{1}, t_{2}) &\text{Por HI} \\
+  &= 1 + comparisons\_insert(h_{1}, t_{2}) + comparisons\_merge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}\\
+  &= comparisons\_insert(h_{1}, h_{2} : t_{2}) + comparisons\_merge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}\\
+  &= comparisons\_insert(h_{1}, h_{2} : t_{2}) + comparisons\_merge(t_{1}, r_{1}) &\text{Pois $h_{1} \not \le h_{2}$}\\
+  &= comparisons\_merge(h_{1} : t_{1}, h_{2} : t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
+\end{align*}
+
+Na terceira igualdade estamos usando a segunda hip\'otese indutiva com $l_{1} = h_{1} : t_{1}$. Note que,
+como $h_{1} \not \le h_{2}$, vale que $comparisons\_insert(h_{1}, h_{2} : t_{2}) = 1 + comparisons\_insert(h_{1}, t_{2})$. Pelo mesmo motivo, $remove\_prefix(h_{1}, h_{2} : t_{2}) = remove\_prefix(h_{1}, t_{2})$.
 
 \qed
 
