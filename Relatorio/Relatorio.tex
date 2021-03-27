@@ -18,8 +18,12 @@
 \usepackage{minted}
 \usepackage{proof}
 \usepackage{amsmath,amsfonts,amsthm,bm}
-% \usepackage[nonumberlist,style=index,nomain]{glossaries}%
 \usepackage{mathtools}
+\usepackage{appendix}
+
+\renewcommand{\appendixtocname}{Ap\^endices}
+\renewcommand{\appendixpagename}{Ap\^endices}
+
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclareUnicodeCharacter{2200}{$\mathbb{\forall}$}
@@ -67,11 +71,11 @@ Universidade Federal de Minas Gerais
 
 \newglossaryentry{listempty}{name = $[]$, description = {Lista vazia}}
 
-\newglossaryentry{listcons}{name = $h : t$, description={Lista composta pelo elemento $h$ seguido pela lista $t$}}
+\newglossaryentry{listcons}{name = $h :: t$, description={Lista composta pelo elemento $h$ seguido pela lista $t$}}
 
 \newglossaryentry{listtype}{name = $[A]$, description={Tipo das listas de elementos do tipo $A$}}
 
-\newglossaryentry{typing}{name=$a :: A$, description={Termo $a$ tem tipo $A$}}
+\newglossaryentry{typing}{name=$a : A$, description={Termo $a$ tem tipo $A$}}
 
 \newglossaryentry{functype}{ name=$A \rightarrow B$, description={Tipo das fun\c{c}\~oes do tipo $A$ para o tipo $B$}  }
 
@@ -123,8 +127,10 @@ não possuem conjuntos como elementos. A classe $1$ se referia a todos os conjun
 se possuírem conjuntos como elementos, estes deverão pertencer a classe $0$. De modo
 geral, conjuntos da classe $i$ só podem conter conjuntos de classes $j$, tal que $j < i$. Desse
 modo, não podem existir conjuntos que contém a si próprios e o paradoxo deixa de existir.
-Embora tenha resolvido esse problema, a teoria é menos expressiva do que sua antecessora,
-o que fez com que não fosse amplamente adotada pelos matemáticos.
+Embora tenha resolvido esse problema, a teoria é menos expressiva do que sua antecessora.
+Um exemplo disso \'e a impossibilidade de representar um tipo universal, que
+contenha todos os outros tipos. Esse tipo de limita\c{c}\~ao fez com que a
+teoria de Russell não fosse amplamente adotada pelos matemáticos.
 
 \qquad Contudo, com o surgimento da Ciência da Computação, as ideias da Teoria dos Tipos
 encontraram uma nova aplicação nas Linguagens de Programação. A maioria delas adota
@@ -145,11 +151,11 @@ imediatamente na execução.
 
 \subsection*{Isomorfismo de Curry-Howard}
 \qquad Em meados do século XX, foi descoberto que os Sistemas de Tipos possuíam uma
-relação muito profunda com a lógica. Considere, por exemplo, uma função $f :: A \rightarrow B$
+relação muito profunda com a lógica. Considere, por exemplo, uma função $f : A \rightarrow B$
 sendo $A$ e $B$ tipos quaisquer. Uma regra clássica dos sistemas de tipo é algo como:
 
 \begin{center}
-  $\infer{f(a) :: B}{f :: A \rightarrow B & a :: A}$
+  $\infer{f(a) : B}{f : A \rightarrow B & a : A}$
 \end{center}
 
 \qquad Ou seja, se $f$ é uma função de $A$ para $B$ e $a$ é um objeto do tipo $A$, então aplicar
@@ -195,7 +201,11 @@ são sistemas que dão suporte a certas linguagens de programação, fazendo com
 concretizem essa correspondência e seja possível usá-las para demonstrar teoremas por
 meio da escrita de programas. Tais demonstrações podem ser verificadas mecanicamente
 pelo compilador da linguagem, fazendo com que o grau de confiabilidade que elas atinjam
-seja muito superior ao de demonstrações convencionais.
+seja muito superior ao de demonstrações convencionais. Existem assistentes de
+demonstra\c{c}\~ao que
+n\~ao usam o Isomorfismo de Curry-Howard, mas outros modelos para implementar
+as mesmas funcionalidades. Um desses modelos \'e o \textit{Logic for Computable
+Functions} \cite{lcf}.
 
 \qquad De acordo com Geuvers \cite{geuvers} (p. 4): ``Uma demonstração matemática pode ser
 reduzida a uma série de etapas muito breves que podem ser verificadas de forma sim-
@@ -270,7 +280,7 @@ no assistente.
 \section{Algoritmos de Ordena\c{c}\~ao}
 \qquad Um algoritmo de ordena\c{c}\~ao \'e um m\'etodo que recebe como entrada uma lista de objetos
 compar\'aveis e retorna uma permuta\c{c}\~ao da lista, na qual os objetos est\~ao ordenados. Formalmente,
-para um m\'etodo $f :: [A] \rightarrow [A]$ ser considerado um algoritmo de ordena\c{c}\~ao correto, ele deve
+para um m\'etodo $f : [A] \rightarrow [A]$ ser considerado um algoritmo de ordena\c{c}\~ao correto, ele deve
 satisfazer, para qualquer lista $xs$:
 
 \begin{itemize}
@@ -345,9 +355,9 @@ total sobre o tipo. Isso significa que, se a fun\c{c}\~ao de compara\c{c}\~ao so
 pelo operador bin\'ario ``$\le$'', as seguintes propriedades devem valer:
 
 \begin{itemize}
-  \item $\forall t :: T, \quad t \le t$
-  \item $\forall t_{1}, t_{2} :: T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{1} \leftrightarrow t_{1} = t_{2}$
-  \item $\forall t_{1}, t_{2}, t_{3} :: T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{3} \rightarrow t_{1} \le t_{3}$
+  \item $\forall t : T, \quad t \le t$
+  \item $\forall t_{1}, t_{2} : T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{1} \leftrightarrow t_{1} = t_{2}$
+  \item $\forall t_{1}, t_{2}, t_{3} : T, \quad t_{1} \le t_{2} \wedge t_{2} \le t_{3} \rightarrow t_{1} \le t_{3}$
 \end{itemize}
 
 \qquad Al\'em disso, a fun\c{c}\~ao deve ser total, isto \'e, deve estar definida para todos os pares de
@@ -366,7 +376,7 @@ para todo $k < n$. Se essa hip\'otese implicar na veracidade de $P(n)$, ent\~ao,
 Indu\c{c}\~ao Transfinita, obt\^em-se a veracidade de $P(m)$, para todo $m$ natural.
 
 \qquad Eventualmente ser\'a necess\'ario usar a indu\c{c}\~ao com uma hip\'otese da forma $P(f(n))$, para
-algum predicado $P$ e fun\c{c}\~ao $f :: \mathbb{N} \rightarrow \mathbb{N}$. Isso \'e v\'alido, desde que se
+algum predicado $P$ e fun\c{c}\~ao $f : \mathbb{N} \rightarrow \mathbb{N}$. Isso \'e v\'alido, desde que se
 demonstre que $f$ \'e estritamente decrescente. Com essa propriedade, temos a garantia que $f(n) < n$,
 logo a hip\'otese de indu\c{c}\~ao se aplica a $f(n)$. Caso exista algum $n$ tal que $f(n) \geq n$,
 estar\'iamos usando uma hip\'otese que n\~ao temos para demonstrar o teorema, o que \'e inv\'alido.
@@ -380,7 +390,7 @@ assistente, que \'e capaz de determinar se a demonstra\c{c}\~ao \'e v\'alida ou 
 \qquad Assim como muitos outros assistentes, Lean \'e baseado em \textbf{tipos
   dependentes} \cite{typesAtWork}. Ou seja, cada proposi\c{c}\~ao que se enuncia dentro da linguagem \'e
 representada internamente por um tipo, o qual depende de valores de outros tipos. Um exemplo para essa
-id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b :: T$, o s\'imbolo ``$=$'' age como
+id\'eia \'e a igualdade. Ao enunciar um teorema como $a = b$, sendo $a, b : T$, o s\'imbolo ``$=$'' age como
 um construtor de tipos, que toma dois valores do tipo $T$ como par\^ametro e retorna o tipo relativo a
 igualdade entre os dois valores. Nesse contexto, construir um termo do tipo ``$a = b$'' equivale a demonstrar
 a igualdade entre esses dois valores.
@@ -414,7 +424,6 @@ esse tipo de propriedade ainda n\~ao foi formalizada para nenhum algoritmo dessa
 \qquad O seguinte c\'odigo apresenta a defini\c{c}\~ao dos n\'umeros naturais, da adi\c{c}\~ao sobre eles e a
 demonstra\c{c}\~ao da comutatividade dessa opera\c{c}\~ao em Lean, junto com dois lemas necess\'arios para essa
 demonstra\c{c}\~ao:
-\newpage
 
 \inputminted{lean}{add.lean}
 
@@ -427,7 +436,7 @@ eles ser\~ao definidos em linguagem matem\'atica.
 \qquad A defini\c{c}\~ao original desses algoritmos (que \'e usada pela \textit{mathlib})
 n\~ao registra a quantidade de compara\c{c}\~oes que
 s\~ao feitas, o que torna imposs\'ivel que se demonstre
-teoremas sobre esses n\'umeros. Por causa
+teoremas sobre esses n\'umeros em Lean. Por causa
 disso, definimos novas fun\c{c}\~oes que produzem, al\'em de listas,
 n\'umeros naturais que determinam o n\'umero de opera\c{c}\~oes executadas.
 
@@ -441,6 +450,14 @@ algoritmo modificado est\'a contando essas compara\c{c}\~oes corretamente. Final
 demonstraremos um limite para esse n\'umero, em fun\c{c}\~ao do tamanho da lista de entrada.
 Considerando uma lista de tamanho $n$, mostraremos que o Insertion Sort se limita a $n^{2}$
 compara\c{c}\~oes, enquanto o Merge Sort nunca passa de $8 n \log_{2} (n)$.
+
+\qquad Para definir os algoritmos, \'e necess\'ario definir formalmente como se
+constroem as listas que ser\~ao usadas. Usaremos o s\'imbolo $[]$ para indicar
+uma lista sem nenhum elemento e o s\'imbolo $::$ para indicar a constru\c{c}\~ao
+de uma lista, que ter\'a como primeiro elemento a entidade a esquerda do
+s\'imbolo, seguido pela lista de elementos a direita dele. Por exemplo, a
+constru\c{c}\~ao $3 :: 2 :: 6 :: []$ representa a lista que cont\'em o n\'umero
+$3$, seguido por $2$, seguido por $6$.
 
 \section{Insertion Sort}
 
@@ -459,49 +476,48 @@ insert(x, []) = [x]
 \begin{equation} \label{ins_ind}
 insert(x, y : ys) =
   \begin{cases}
-    x : y : ys \text{, \qquad\,\,\,\,\, se } x \le y\\
-    y : insert(x, ys) \text{, caso contr\'ario}
+    x :: y :: ys \text{, \qquad\,\,\,\,\, se } x \le y\\
+    y :: insert(x, ys) \text{, caso contr\'ario}
   \end{cases}
 \end{equation}
 
-\newpage
 \qquad A vers\~ao estendida funciona exatamente da mesma forma, mas produz tamb\'em um
 n\'umero natural, que conta o n\'umero de opera\c{c}\~oes realizadas.
 
 \begin{equation} \label{ins_ext_base}
-insert\_extended(x, []) = ([x], 0)
+insertExtended(x, []) = ([x], 0)
 \end{equation}
 
 \begin{equation} \label{ins_ext_ind}
-insert\_extended(x, y : ys) =
+insertExtended(x, y :: ys) =
   \begin{cases}
-    (x : y : ys, 1) \text{, se } x \le y\\
-    (y : l, 1 + n) \text{, caso contr\'ario,}\\ \text{\quad \textbf{onde: }} (l, n) := insert\_extended(x, ys)
+    (x :: y :: ys, 1) \text{, se } x \le y\\
+    (y :: l, 1 + n) \text{, caso contr\'ario,}\\ \text{\quad \textbf{onde: }} (l, n) := insertExtended(x, ys)
   \end{cases}
 \end{equation}
 
 \qquad Usando $insert$, podemos definir o Insertion Sort.
 Essa fun\c{c}\~ao recebe uma lista $xs$ e produz uma permuta\c{c}\~ao ordenada de $xs$.
 As equa\c{c}\~oes \ref{ins_sort_base} e \ref{ins_sort_ind} representam sua vers\~ao original, enquanto
-\ref{ins_sort_ext_base} e \ref{ins_sort_ext_ind} representam sua vers\~ao extendida.
+\ref{ins_sort_ext_base} e \ref{ins_sort_ext_ind} representam sua vers\~ao estendida.
 
 \begin{equation} \label{ins_sort_base}
-insertion\_sort([]) = []
+insertionSort([]) = []
 \end{equation}
 \begin{equation} \label{ins_sort_ind}
-insertion\_sort(x : xs) = insert(x, insertion\_sort(xs))
+insertionSort(x :: xs) = insert(x, insertionSort(xs))
 \end{equation}
 
 \begin{equation} \label{ins_sort_ext_base}
-insertion\_sort\_extended([]) = ([], 0)
+insertionSortExtended([]) = ([], 0)
 \end{equation}
 
 
 \begin{equation}\label{ins_sort_ext_ind}
 \begin{split}
-  insertion\_sort\_extended(x : xs) &= (l', n + m),\\
-  \text{\textbf{onde:} }(l, m) &:= insertion\_sort\_extended(xs)\\
-  \text{\quad} (l', n) &:= insert\_extended(x, l)
+  insertionSortExtended(x :: xs) &= (l', n + m),\\
+  \text{\textbf{onde:} }(l, m) &:= insertionSortExtended(xs)\\
+  \text{\quad} (l', n) &:= insertExtended(x, l)
 \end{split}
 \end{equation}
 
@@ -510,7 +526,7 @@ insertion\_sort\_extended([]) = ([], 0)
 auxiliares. A primeira, chamada $split$, recebe uma lista e produz um par de listas,
 na qual a primeira cont\'em todos os elementos em posi\c{c}\~oes pares da lista de entrada
 e a segunda os elementos de posi\c{c}\~ao \'impar. As equa\c{c}\~oes \ref{split_base} e \ref{split_ind}
-representam a defini\c{c}\~ao original e \ref{split_ext_base} e \ref{split_ext_ind} a vers\~ao extendida.
+representam a defini\c{c}\~ao original e \ref{split_ext_base} e \ref{split_ext_ind} a vers\~ao estendida.
 Note que, apesar do $split$ n\~ao executar nenhuma compara\c{c}\~ao, \'e necess\'ario contar quantas vezes
 ele \'e usado, pois este n\'umero tem a mesma ordem de grandeza do tamanho da lista, logo essa fun\c{c}\~ao
 pode interferir na performance do Merge Sort.
@@ -520,20 +536,18 @@ split([]) = ([], [])
 \end{equation}
 \begin{equation}
 \begin{split}\label{split_ind}
-  split(x : xs) &= (x : l_{2}, l_{1}),\\
+  split(x :: xs) &= (x :: l_{2}, l_{1}),\\
   \text{\textbf{onde:} } (l_{1}, l_{2}) &:= split(xs)
 \end{split}
 \end{equation}
 
-\newpage
-
 \begin{equation}\label{split_ext_base}
-  split\_extended([]) = ([], [], 0)
+  splitExtended([]) = ([], [], 0)
 \end{equation}
 \begin{equation}\label{split_ext_ind}
 \begin{split}
-  split\_extended(x : xs) &= (x : l_{2}, l_{1}, 1 + n)\\
-  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= split\_extended(xs)
+  splitExtended(x :: xs) &= (x :: l_{2}, l_{1}, 1 + n)\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= splitExtended(xs)
 \end{split}
 \end{equation}
 
@@ -542,7 +556,7 @@ split([]) = ([], [])
 ordenadas e produz uma nova lista, intercalando todos os elementos das listas
 de entrada, de modo que a lista final esteja ordenada. As equa\c{c}\~oes \ref{merge_1},
 \ref{merge_2} e \ref{merge_3} s\~ao sua vers\~ao original, e as equa\c{c}\~oes
-\ref{merge_ext_1}, \ref{merge_ext_2} e \ref{merge_ext_3} s\~ao sua vers\~ao extendida.
+\ref{merge_ext_1}, \ref{merge_ext_2} e \ref{merge_ext_3} s\~ao sua vers\~ao estendida.
 
 \begin{equation} \label{merge_1}
 merge(xs, []) = xs
@@ -552,28 +566,27 @@ merge([], ys) = ys
 \end{equation}
 
 \begin{equation} \label{merge_3}
-merge(x : xs, y : ys) =
+merge(x :: xs, y :: ys) =
      \begin{cases}
-       x : merge(xs, y : ys) \text{,\qquad se $x \le y$} \\
-       y : merge(x : xs, ys) \text{,\qquad caso contr\'ario}
+         x :: merge(xs, y :: ys) \text{,\qquad se $x \le y$} \\
+       y :: merge(x :: xs, ys) \text{,\qquad caso contr\'ario}
      \end{cases}
 \end{equation}
 
 \begin{equation} \label{merge_ext_1}
-merge\_extended(xs, []) = (xs, 0)
+mergeExtended(xs, []) = (xs, 0)
 \end{equation}
 \begin{equation} \label{merge_ext_2}
-merge\_extended([], ys) = (ys, 0)
+mergeExtended([], ys) = (ys, 0)
 \end{equation}
 
 \begin{equation} \label{merge_ext_3}
-merge\_extended(x : xs, y : ys) =
+mergeExtended(x :: xs, y :: ys) =
      \begin{cases}
-       (x : l_{1}, 1 + n) \text{,\qquad \, se $x \le y$} \\
-       % \text{\quad \textbf{onde: }} (l_{1}, n) = merge\_extended(xs, y : ys) \\
-       (y : l_{2}, 1 + m) \text{,\qquad caso contr\'ario} \\
-       \text{\quad \textbf{onde: }} (l_{1}, n) := merge\_extended(xs, y : ys) \\
-       \text{\qquad \quad \,\,\,\,\, } (l_{2}, m) := merge\_extended(x : xs, ys)
+       (x :: l_{1}, 1 + n) \text{,\qquad \, se $x \le y$} \\
+       (y :: l_{2}, 1 + m) \text{,\qquad caso contr\'ario} \\
+       \text{\quad \textbf{onde: }} (l_{1}, n) := mergeExtended(xs, y :: ys) \\
+       \text{\qquad \quad \,\,\,\,\, } (l_{2}, m) := mergeExtended(x :: xs, ys)
      \end{cases}
 \end{equation}
 
@@ -581,49 +594,50 @@ merge\_extended(x : xs, y : ys) =
 Sort, o Merge Sort recebe uma lista $xs$ e produz uma permuta\c{c}\~ao ordenada de $xs$. As
 equa\c{c}\~oes \ref{ms_1}, \ref{ms_2} e \ref{ms_3} representam sua defini\c{c}\~ao original,
 enquanto as equa\c{c}\~oes \ref{ms_ext_1}, \ref{ms_ext_2} e \ref{ms_ext_3} representam
-sua vers\~ao extendida.
+sua vers\~ao estendida.
 
 \begin{equation}\label{ms_1}
-merge\_sort([]) = []
+mergeSort([]) = []
 \end{equation}
 
 \begin{equation}\label{ms_2}
-merge\_sort([x]) = [x]
+mergeSort([x]) = [x]
 \end{equation}
 
 \begin{equation}\label{ms_3}
 \begin{split}
-  merge\_sort(x_{1} : x_{2} : xs) &= merge(l_{1}', l_{2}'),\\
-  \text{\textbf{onde:} } (l_{1}, l_{2}) &:= split(x_{1} : x_{2} : xs),\\
-  l_{1}' &:= merge\_sort(l_{1}),\\
-  l_{2}' &:= merge\_sort(l_{2})
+  mergeSort(x_{1} :: x_{2} :: xs) &= merge(l_{1}', l_{2}'),\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}) &:= split(x_{1} :: x_{2} :: xs),\\
+  l_{1}' &:= mergeSort(l_{1}),\\
+  l_{2}' &:= mergeSort(l_{2})
 \end{split}
 \end{equation}
 
 \begin{equation}\label{ms_ext_1}
-merge\_sort\_extended([]) = ([], 0)
+mergeSortExtended([]) = ([], 0)
 \end{equation}
 
 \begin{equation}\label{ms_ext_2}
-merge\_sort\_extended([x]) = ([x], 0)
+mergeSortExtended([x]) = ([x], 0)
 \end{equation}
 
 \begin{equation}\label{ms_ext_3}
 \begin{split}
-  merge\_sort\_extended(x_{1} : x_{2} : xs) &= (l, n + m_{1} + m_{2} + p),\\
-  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= split\_extended(x_{1} : x_{2} : xs),\\
-  (l_{1}', m_{1}) &:= merge\_sort\_extended(l_{1}),\\
-  (l_{2}', m_{2}) &:= merge\_sort\_extended(l_{2}),\\
-  (l, p) &:= merge\_extended(l_{1}', l_{2}')
+  mergeSortExtended(x_{1} :: x_{2} :: xs) &= (l, n + m_{1} + m_{2} + p),\\
+  \text{\textbf{onde:} } (l_{1}, l_{2}, n) &:= splitExtended(x_{1} :: x_{2} :: xs),\\
+  (l_{1}', m_{1}) &:= mergeSortExtended(l_{1}),\\
+  (l_{2}', m_{2}) &:= mergeSortExtended(l_{2}),\\
+  (l, p) &:= mergeExtended(l_{1}', l_{2}')
 \end{split}
 \end{equation}
 
 \section{Fun\c{c}\~oes para Certifica\c{c}\~ao}
 
-\qquad Como foi mencionado, tamb\'em ser\'a demonstrado que o n\'umero de compara\c{c}\~oes
-calculado pelas fun\c{c}\~oes \'e, de fato, o n\'umero de compara\c{c}\~oes que est\~ao sendo feitas.
-Para isso, tamb\'em precisamos definir fun\c{c}\~oes que calculam, para uma determinada lista,
-qual o n\'umero de compara\c{c}\~oes que cada um dos algoritmos realiza.
+\qquad Tamb\'em \'e necess\'ario garantir que o n\'umero que estamos calculando
+est\'a capturando corretamente nossa inten\c{c}\~ao, que \'e contar o n\'umero
+de opera\c{c}\~oes realizadas por cada algoritmo.  Para isso, tamb\'em
+precisamos definir fun\c{c}\~oes que calculam, para uma determinada lista,
+quantas opera\c{c}\~oes os algoritmos fazem.
 
 \qquad Sabemos que $insert$ realiza uma compara\c{c}\~ao para cada elemento do prefixo da lista
 de entrada que \'e menor do que o elemento que estamos inserindo, e mais uma para o primeiro
@@ -631,16 +645,16 @@ que n\~ao \'e menor (caso ele exista). A seguinte fun\c{c}\~ao usa essa informa\
 para produzir o n\'umero exato de compara\c{c}\~oes:
 
 \begin{equation} \label{comp_ins_base}
-  comparisons\_insert(x, []) = 0
+  comparisonsInsert(x, []) = 0
 \end{equation}
 
 
 \begin{equation} \label{comp_ins_ind}
 \begin{split}
-  comparisons\_insert(x, y : ys) =
+  comparisonsInsert(x, y :: ys) =
     \begin{cases}
       1, &\text{se } x \le y \\
-      1 + comparisons\_insert(x, ys), &\text{caso contr\'ario}
+      1 + comparisonsInsert(x, ys), &\text{caso contr\'ario}
     \end{cases}
 \end{split}
 \end{equation}
@@ -654,15 +668,15 @@ recebe um elemento e uma lista ordenada, e remove o prefixo da lista que \'e men
 recebido:
 
 \begin{equation} \label{rem_pref_base}
-  remove\_prefix(x, []) = []
+  removePrefix(x, []) = []
 \end{equation}
 
 \begin{equation} \label{rem_pref_ind}
 \begin{split}
-  remove\_prefix(x, y : ys) =
+  removePrefix(x, y :: ys) =
     \begin{cases}
-      y : ys, &\text{se } x \le y \\
-      remove\_prefix(x, ys), &\text{caso contr\'ario}
+      y :: ys, &\text{se } x \le y \\
+      removePrefix(x, ys), &\text{caso contr\'ario}
     \end{cases}
 \end{split}
 \end{equation}
@@ -670,41 +684,38 @@ recebido:
 \qquad Agora vamos definir a fun\c{c}\~ao que calcula o n\'umero de compara\c{c}\~oes em uma execu\c{c}\~ao
 do $merge$. Note que, pela similiaridade entre
 o $insert$ e as opera\c{c}\~oes que o $merge$ realiza em cada um dos elementos,
-podemos usar a fun\c{c}\~ao $comparisons\_insert$ para ajudar a contar esse n\'umero.
+podemos usar a fun\c{c}\~ao $comparisonsInsert$ para ajudar a contar esse n\'umero.
 
 \begin{equation} \label{comp_merge_base_1}
-  comparisons\_merge(xs, []) = 0
+  comparisonsMerge(xs, []) = 0
 \end{equation}
 
 \begin{equation} \label{comp_merge_base_2}
-  comparisons\_merge([], ys) = 0
+  comparisonsMerge([], ys) = 0
 \end{equation}
 
 \begin{equation} \label{comp_merge_ind}
   \begin{split}
-  comparisons\_merge(x : xs, ys) &= comparisons\_insert(x, ys) + comparisons\_merge(xs, ys')\\
-  \text{\textbf{onde: }} ys' &:= remove\_prefix(x, ys)
+  comparisonsMerge(x :: xs, ys) &= comparisonsInsert(x, ys) + comparisonsMerge(xs, ys')\\
+  \text{\textbf{onde: }} ys' &:= removePrefix(x, ys)
   \end{split}
 \end{equation}
 
-% \begin{equation} \label{comp_merge_ind}
-% \begin{split}
-%   comparisons\_merge(x : xs, ys) =
-%       \begin{cases}
-%         comparisons\_insert(x, ys), &\text{se } ys' = [] \\
-%         comparisons\_insert(x, ys) + \\ \text{\quad} comparisons\_merge(xs, ys'), &\text{caso contr\'ario}\\
-%         \text{\qquad\textbf{onde: }} ys' := remove\_prefix(x, ys)
-%       \end{cases} \\
-% \end{split}
-% \end{equation}
-
 \chapter{Demonstra\c{c}\~oes Convencionais}
 
-Nesta se\c{c}\~ao iremos apresentar e demonstrar, de forma convencional, teoremas que formalizam os seguintes fatos:
+Nesta se\c{c}\~ao iremos apresentar e demonstrar, de forma convencional,
+os principais teoremas deste trabalho. Isso \'e importante pois a
+argumenta\c{c}\~ao utilizada nessas demonstra\c{o}\~oes \'e essencialmente a
+mesma que a do c\'odigo que apresentaremos na se\c{c}\~ao 5, assim, poderemos
+focar apenas no c\'odigo em si na pr\'oxima se\c{c}\~ao. Al\'em disso, essa
+apresenta\c{c}\~ao ir\'a tornar mais clara as semelhan\c{c}as entre as
+demonstra\c{c}\~oes convencionais e o processo de demonstrar teoremas em
+assistentes como o Lean. Os fatos que
+estamos interessados em formalizar s\~ao os seguintes:
 \begin{itemize}
-  \item O primeiro elemento retornado nas defini\c{c}\~oes extendidas \'e igual ao retorno das defini\c{c}\~oes originais correspondentes.
-  \item O segundo elemento retornado nas defini\c{c}\~oes extendidas \'e limitado por uma fun\c{c}\~ao (a ser especificada) do tamanho da lista de entrada.
-  \item O segundo elemento retornado nas defini\c{c}\~oes extendidas \'e igual ao retorno das fun\c{c}\~oes de certifica\c{c}\~ao correspondentes.
+  \item O primeiro elemento do par retornado nas defini\c{c}\~oes estendidas \'e igual ao retorno das defini\c{c}\~oes originais correspondentes.
+  \item O segundo elemento do par retornado nas defini\c{c}\~oes estendidas \'e limitado por uma fun\c{c}\~ao (a ser especificada) do tamanho da lista de entrada.
+  \item O segundo elemento do par retornado nas defini\c{c}\~oes estendidas \'e igual ao retorno das fun\c{c}\~oes de certifica\c{c}\~ao correspondentes.
 \end{itemize}
 
 \qquad Ao longo dos teoremas, usaremos $A$ para indicar um tipo gen\'erico que possui uma ordem total induzida pelo
@@ -719,74 +730,74 @@ $length(l_{1})$ e $n_{2}$ para indicar $length(l_{2})$.
 \newtheorem{lema}{Lema}[section]
 
 \begin{teorema} \label{insert_eq}
-  $\forall a :: A, l :: [A], \,\, proj_1(insert\_extended(a, l)) = insert(a, l)$
+  $\forall a : A, l : [A], \,\, proj_1(insertExtended(a, l)) = insert(a, l)$
 \end{teorema}
 \noindent \textit{Demonstra\c{c}\~ao.}
 
   \textbf{Passo Base: } $l = []$.
   \begin{align*}
-    proj_{1}(insert\_extended(a, [])) &= proj_{1}([a], 0)  &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}} \\
+    proj_{1}(insertExtended(a, [])) &= proj_{1}([a], 0)  &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}} \\
                                       &= [a] &\text{Pela defini\c{c}\~ao de } proj_{1} \\
     &= insert(a, [])  &\text{Pela equa\c{c}\~ao \ref{ins_base}}
   \end{align*}
 
-  \textbf{Passo Indutivo: } $l = h : t$.
+  \textbf{Passo Indutivo: } $l = h :: t$.
 
-  \textbf{Hip\'otese Indutiva: } $proj_{1}(insert\_extended(a, t)) = insert(a, t)$.
+  \textbf{Hip\'otese Indutiva: } $proj_{1}(insertExtended(a, t)) = insert(a, t)$.
 
   Caso 1: $a \le h$
     \begin{align*}
-      proj_{1}(insert\_extended(a, h : t)) &= proj_{1}(a : h : t, \star) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
-      &= a : h : t &\text{Pela defini\c{c}\~ao de } proj_1 \\
-      &= insert(a, h : t) &\text{Pela equa\c{c}\~ao \ref{ins_ind}}
+      proj_{1}(insertExtended(a, h : t)) &= proj_{1}(a :: h :: t, \star) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
+      &= a :: h :: t &\text{Pela defini\c{c}\~ao de } proj_1 \\
+      &= insert(a, h :: t) &\text{Pela equa\c{c}\~ao \ref{ins_ind}}
     \end{align*}
     \newpage
 
     Caso 2: $a \not\le h$ \\
 
-      $proj_{1}(insert\_extended(a, h : t))$
+      $proj_{1}(insertExtended(a, h :: t))$
     \begin{align*}
-       &=  proj_{1}(h : proj_{1}(insert\_extended(a, t)), \star) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}}\\
-       &= proj_{1}(h : insert(a, t), \star) &\text{Por HI} \\
-       &= h : insert(a, t) &\text{Pela defini\c{c}\~ao de $proj_{1}$} \\
-      &= insert(a, h : t) &\text{Pela equa\c{c}\~ao \ref{ins_ind}}
+       &=  proj_{1}(h :: proj_{1}(insertExtended(a, t)), \star) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}}\\
+       &= proj_{1}(h :: insert(a, t), \star) &\text{Por HI} \\
+       &= h :: insert(a, t) &\text{Pela defini\c{c}\~ao de $proj_{1}$} \\
+      &= insert(a, h :: t) &\text{Pela equa\c{c}\~ao \ref{ins_ind}}
     \end{align*}
 \qed
 
 \begin{teorema}
-  $\forall l :: [A], \,\, proj_{1}(insertion\_sort\_extended(l)) = insertion\_sort(l)$
+  $\forall l : [A], \,\, proj_{1}(insertionSortExtended(l)) = insertionSort(l)$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l = []$
 \begin{align*}
-  proj_{1}(insertion\_sort\_extended([])  &= proj_{1}([], 0) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_base}} \\
+  proj_{1}(insertionSortExtended([])  &= proj_{1}([], 0) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_base}} \\
                                                                &= [] &\text{Pela defini\c{c}\~ao de } proj_1 \\
-  &= insertion\_sort([]) &\text{Pela equa\c{c}\~ao \ref{ins_sort_base}}
+  &= insertionSort([]) &\text{Pela equa\c{c}\~ao \ref{ins_sort_base}}
 \end{align*}
 
 
-\textbf{Passo Indutivo: } $l = h : t$
+\textbf{Passo Indutivo: } $l = h :: t$
 
-\textbf{Hip\'otese Indutiva: } $proj_{1}(insertion\_sort\_extended(a, t)) = insertion\_sort(a, t)$.\\
+\textbf{Hip\'otese Indutiva: } $proj_{1}(insertionSortExtended(a, t)) = insertionSort(a, t)$.\\
 
-Note: definimos $xs := proj_{1}(insertion\_sort\_extended(t))$\\
+Note: definimos $xs := proj_{1}(insertionSortExtended(t))$\\
 
-$proj_{1}(insert\_sort\_extended(h : t))$
+$proj_{1}(insert\_sort\_extended(h :: t))$
 \begin{align*}
-  &= proj_{1}(proj_{1}(insert\_extended(h, xs)), \star) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_ind}} \\
+  &= proj_{1}(proj_{1}(insertExtended(h, xs)), \star) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_ind}} \\
                                           &= proj_{1}(insert(h, xs), \star) &\text{Pelo teorema \ref{insert_eq}} \\
   &= insert(h, xs) &\text{Pela defini\c{c}\~ao de } proj_1 \\
-  &= insert(h, proj_{1}(insertion\_sort\_extended(t))) &\text{Pela defini\c{c}\~ao de $xs$}\\
-  &= insert(h, insertion\_sort(t)) &\text{Por HI} \\
-  &= insertion\_sort(h : t) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ind}}
+  &= insert(h, proj_{1}(insertionSortExtended(t))) &\text{Pela defini\c{c}\~ao de $xs$}\\
+  &= insert(h, insertionSort(t)) &\text{Por HI} \\
+  &= insertionSort(h :: t) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ind}}
 \end{align*}
 \qed
 
 
 \begin{teorema} \label{count_ins}
-  $\forall a :: A, l :: [A], \,\, proj_{2}(insert\_extended(a, l)) \le n$
+  $\forall a : A, l : [A], \,\, proj_{2}(insertExtended(a, l)) \le n$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -794,28 +805,28 @@ $proj_{1}(insert\_sort\_extended(h : t))$
 \textbf{Passo Base: } $l = []$; $n = 0$
 
 \begin{align*}
-  proj_{2}(insert\_extended(a, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}} \\
+  proj_{2}(insertExtended(a, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}} \\
   &= 0 &\text{Pela defini\c{c}\~ao de } proj_{2}
 \end{align*}
 
-\textbf{Passo Indutivo: } $l = h : t$; $n = 1 + n'$
+\textbf{Passo Indutivo: } $l = h :: t$; $n = 1 + n'$
 
-\textbf{Hip\'otese Indutiva: } $proj_{2}(insert\_extended(a, t)) \le n'$
+\textbf{Hip\'otese Indutiva: } $proj_{2}(insertExtended(a, t)) \le n'$
 
 Caso 1: $a \le h$
 \begin{align*}
-  proj_{2}(insert\_extended(a, h : t)) &= proj_{2}(\star, 1) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
+  proj_{2}(insertExtended(a, h :: t)) &= proj_{2}(\star, 1) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
   &= 1 &\text{Pela defini\c{c}\~ao de } proj_2
 \end{align*}
 
-Como $l$ \'e da forma $h : t$, ela tem pelo menos um elemento, logo a desigualdade vale.
+Como $l$ \'e da forma $h :: t$, ela tem pelo menos um elemento, logo a desigualdade vale.
 
 Caso 2: $a \not\le h$ \\
 
-$proj_{2}(insert\_extended(a, h : t))$
+$proj_{2}(insertExtended(a, h :: t))$
 \begin{align*}
-   &= proj_{2}(\star, 1 + proj_{2}(insert\_extended(a, t))) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
-   &= 1 + proj_{2}(insert\_extended(a, t)) &\text{Pela defini\c{c}\~ao de } proj_2 \\
+   &= proj_{2}(\star, 1 + proj_{2}(insertExtended(a, t))) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
+   &= 1 + proj_{2}(insertExtended(a, t)) &\text{Pela defini\c{c}\~ao de } proj_2 \\
    &\le 1 + n' &\text{Por HI} \\
    &= n &\text{Pela defini\c{c}\~ao de n'}
 \end{align*}
@@ -823,27 +834,27 @@ $proj_{2}(insert\_extended(a, h : t))$
 \qed
 
 \begin{teorema}
-  $\forall l :: [A], \,\, proj_{2}(insertion\_sort\_extended(l)) \le n^{2}$
+  $\forall l : [A], \,\, proj_{2}(insertionSortExtended(l)) \le n^{2}$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l = []$; $n = 0$
 \begin{align*}
-  proj_{2}(insertion\_sort\_extended([])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_base}} \\
+  proj_{2}(insertionSortExtended([])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_base}} \\
   &= 0 &\text{Pela defini\c{c}\~ao de } proj_2
 \end{align*}
 
-\textbf{Passo Indutivo: } $l = h : t$; $n = 1 + n'$
+\textbf{Passo Indutivo: } $l = h :: t$; $n = 1 + n'$
 
-\textbf{Hip\'otese Indutiva: } $proj_{2}(insertion\_sort\_extended(t)) \le (n')^{2}$
+\textbf{Hip\'otese Indutiva: } $proj_{2}(insertionSortExtended(t)) \le (n')^{2}$
 
-Note: definimos $m := proj_{2}(insert\_extended(h, t))$ \\
+Note: definimos $m := proj_{2}(insertExtended(h, t))$ \\
 
-$proj_{2}(insertion\_sort\_extended(h : t))$
+$proj_{2}(insertionSortExtended(h :: t))$
 \begin{align*}
-   &= proj_{2}(\star, proj_{2}(insertion\_sort\_extended(t)) + m) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_ind}} \\
-                                             &= proj_{2}(insertion\_sort\_extended(t)) + m &\text{Pela defini\c{c}\~ao de } proj_{2} \\
+   &= proj_{2}(\star, proj_{2}(insertionSortExtended(t)) + m) &\text{Pela equa\c{c}\~ao \ref{ins_sort_ext_ind}} \\
+                                             &= proj_{2}(insertionSortExtended(t)) + m &\text{Pela defini\c{c}\~ao de } proj_{2} \\
    &\le (n')^{2} + m &\text{Por IH} \\
    &\le (n')^{2} + n' &\text{Pelo teorema \ref{count_ins}} \\
    &=n'(n' + 1) &\text{Por distributividade} \\
@@ -856,7 +867,7 @@ $proj_{2}(insertion\_sort\_extended(h : t))$
 \section{Merge Sort}
 
 \begin{teorema}\label{split_eq}
-  $\forall l :: [A], \,\, proj_{1,2}(split\_extended(l)) = split(l)$
+  $\forall l : [A], \,\, proj_{1,2}(splitExtended(l)) = split(l)$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -864,29 +875,32 @@ $proj_{2}(insertion\_sort\_extended(h : t))$
 \textbf{Passo Base: } $l = []$
 
 \begin{align*}
-  proj_{1,2}(split\_extended([])) &= proj_{1,2}([], [], 0) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}} \\
+  proj_{1,2}(splitExtended([])) &= proj_{1,2}([], [], 0) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}} \\
                                 &= ([],[]) &\text{Pela defini\c{c}\~ao de $proj_{1,2}$} \\
   &= split([]) &\text{Pela equa\c{c}\~ao \ref{split_base}}
 \end{align*}
 
-\textbf{Passo Indutivo: } $l = h : t$
+\textbf{Passo Indutivo: } $l = h :: t$
 
-\textbf{Hip\'otese Indutiva: } $proj_{1,2}(split\_extended(t)) = split(t)$
+\textbf{Hip\'otese Indutiva: } $proj_{1,2}(splitExtended(t)) = split(t)$
 
-Note: definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$
+Note: definimos $(l_{1}, l_{2}, \star) := splitExtended(t)$
 
 \begin{align*}
-  proj_{1,2}(split\_extended(h : t)) &= proj_{1,2}(h : l_{2}, l_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}} \\
-                                     &= (h : l_{2}, l_{1}) &\text{Pela defini\c{c}\~ao de $proj_{1,2}$} \\
-  &= split(h : t') &\text{Pela equa\c{c}\~ao \ref{split_ind}}
+  proj_{1,2}(splitExtended(h : t)) &= proj_{1,2}(h :: l_{2}, l_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}} \\
+                                     &= (h :: l_{2}, l_{1}) &\text{Pela defini\c{c}\~ao de $proj_{1,2}$} \\
+  &= split(h :: t') &\text{Pela equa\c{c}\~ao \ref{split_ind}}
 \end{align*}
 
-No \'ultimo termo, $t'$ indica alguma lista tal que $split(t') = (l_{1}, l_{2})$. Por hip\'otese indutiva, $t$ satisfaz esse requerimento. Al\'em disso, $split$ \'e claramente uma fun\c{c}\~ao injetiva. Logo, $t$ \'e a \'unica lista que satisfaz essa igualdade, e temos $split(h : t') = split(h : t)$.
+No \'ultimo termo, $t'$ indica alguma lista tal que $split(t') = (l_{1},
+l_{2})$. Por hip\'otese indutiva, $t$ satisfaz esse requerimento. Al\'em disso,
+$split$ \'e claramente uma fun\c{c}\~ao injetiva. Logo, $t$ \'e a \'unica lista
+que satisfaz essa igualdade, e temos $split(h :: t') = split(h :: t)$.
 
 \qed
 
 \begin{teorema}\label{merge_eq}
-  $\forall l_{1}, l_{2} :: [A], \,\, proj_1(merge\_extended(l_{1}, l_{2})) = merge(l_{1}, l_{2})$
+  $\forall l_{1}, l_{2} : [A], \,\, proj_1(mergeExtended(l_{1}, l_{2})) = merge(l_{1}, l_{2})$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -894,51 +908,52 @@ No \'ultimo termo, $t'$ indica alguma lista tal que $split(t') = (l_{1}, l_{2})$
 \textbf{Passo Base: } $l_{1} = []$
 
 \begin{align*}
-  proj_{1}(merge\_extended([], l_{2})) &= proj_{1}(l_{2}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}} \\
+  proj_{1}(mergeExtended([], l_{2})) &= proj_{1}(l_{2}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}} \\
   &= l_{2} &\text{Pela defini\c{c}\~ao de } proj_1\\
   &= merge([], l_{2}) &\text{Pela equa\c{c}\~ao \ref{merge_2}}
 \end{align*}
 
-\textbf{Passo Indutivo: } $l_{1} = h_{1} : t_{1}$
+\textbf{Passo Indutivo: } $l_{1} = h_{1} :: t_{1}$
 
-\textbf{Hip\'otese Indutiva: } $\forall l_{2} :: [A], \,\, proj_{1}(merge\_extended(t_{1}, l_{2})) = merge(t_{1}, l_{2})$
+\textbf{Hip\'otese Indutiva: } $\forall l_{2} : [A], \,\, proj_{1}(mergeExtended(t_{1}, l_{2})) = merge(t_{1}, l_{2})$
 
 Para demonstrar o passo indutivo, faremos indu\c{c}\~ao na segunda lista:
 
 \textbf{Passo Base 2: }: $l_{2} = []$
 
 \begin{align*}
-  proj_{1}(merge\_extended(h_{1} : t_{1}, [])) &= proj_{1}(h_{1} : t_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}} \\
-  &= h_{1} : t_{1} &\text{Pela defini\c{c}\~ao de } proj_1 \\
-  &= merge(h_{1} : t_{1}, []) &\text{Pela equa\c{c}\~ao \ref{merge_1}}
+  proj_{1}(mergeExtended(h_{1} :: t_{1}, [])) &= proj_{1}(h_{1} : t_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}} \\
+  &= h_{1} :: t_{1} &\text{Pela defini\c{c}\~ao de } proj_1 \\
+  &= merge(h_{1} :: t_{1}, []) &\text{Pela equa\c{c}\~ao \ref{merge_1}}
 \end{align*}
 
-\textbf{Passo Indutivo 2: } $l_{2} = h_{2} : t_{2}$
+\textbf{Passo Indutivo 2: } $l_{2} = h_{2} :: t_{2}$
 
-\textbf{Hip\'otese Indutiva 2: } $\forall l_{1} :: [A], \,\, proj_{1}(merge\_extended(l_{1}, t_{1})) = merge(l_{1}, t_{1})$
+\textbf{Hip\'otese Indutiva 2: } $\forall l_{1} : [A], \,\, proj_{1}(mergeExtended(l_{1}, t_{1})) = merge(l_{1}, t_{1})$
 
-Note: definimos $l'_{1} := proj_{1}(merge\_extended(t_{1}, h_{2} : t_{2}))$
+Note: definimos $l'_{1} := proj_{1}(mergeExtended(t_{1}, h_{2} :: t_{2}))$
 
 Caso 1: $h_{1} \le h_{2}$\\
 
-$ proj_{1}(merge\_extended(h_{1} : t_{1}, h_{2} : t_{2})) $
+$ proj_{1}(mergeExtended(h_{1} :: t_{1}, h_{2} :: t_{2})) $
 \begin{align*}
- &= proj_{1}(h_{1} : l'_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}} \\
-                                                          &= h_{1} : l'_{1} &\text{Pela defini\c{c}\~ao de $proj_{1}$} \\
-  &= h_{1} : merge(t_{1}, h_{2} : t_{2}) &\text{Por HI} \\
-  &= merge(h_{1} : t_{1}, h_{2} : t_{2}) &\text{Pela equa\c{c}\~ao \ref{merge_3}}
+ &= proj_{1}(h_{1} :: l'_{1}, \star) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}} \\
+                                                          &= h_{1} :: l'_{1} &\text{Pela defini\c{c}\~ao de $proj_{1}$} \\
+  &= h_{1} :: merge(t_{1}, h_{2} :: t_{2}) &\text{Por HI} \\
+  &= merge(h_{1} :: t_{1}, h_{2} :: t_{2}) &\text{Pela equa\c{c}\~ao \ref{merge_3}}
 \end{align*}
 
-Observe que, na terceira igualdade estamos usando a primeira hip\'otese de indu\c{c}\~ao, tomando $l_{2} = h_{2} : t_{2}$. A prova do segundo caso, em que $h_{1} \not\le h_{2}$, \'e totalmente an\'aloga, usando a segunda hip\'otese de indu\c{c}\~ao.
+Observe que, na terceira igualdade estamos usando a primeira hip\'otese de
+indu\c{c}\~ao, tomando $l_{2} = h_{2} :: t_{2}$. A demonstra\c{c}\~ao do segundo caso, em que $h_{1} \not\le h_{2}$, \'e totalmente an\'aloga, usando a segunda hip\'otese de indu\c{c}\~ao.
 
 \qed
 
 Os seguintes lemas ser\~ao \'uteis em alguns dos pr\'oximos teoremas:
 
 \begin{lema} \label{split_le}
-  $\forall l :: [A], \,\, length(proj_{1}(split\_extended(l))) \le length(l)\, \wedge$
+  $\forall l : [A], \,\, length(proj_{1}(splitExtended(l))) \le length(l)\, \wedge$
 
-  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(split\_extended(l))) \le length(l)$
+  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(splitExtended(l))) \le length(l)$
 \end{lema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -946,70 +961,73 @@ Os seguintes lemas ser\~ao \'uteis em alguns dos pr\'oximos teoremas:
 \textbf{Passo Base: } $l = []$
 
 \begin{align*}
-  length(proj_{1}(split\_extended([]))) &= length(proj_{1}([], \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}}\\
+  length(proj_{1}(splitExtended([]))) &= length(proj_{1}([], \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}}\\
                                         &= length([]) &\text{Pela defini\c{c}\~ao de $proj_{1}$ }\\
   &= 0 &\text{Pela defini\c{c}\~ao de $length$}\\
 \end{align*}
 
 A demonstra\c{c}\~ao do segundo item \'e an\'aloga.
 
-\textbf{Passo Indutivo: } $l = h : t$
+\textbf{Passo Indutivo: } $l = h :: t$
 
-\textbf{Hip\'otese Indutiva: } $length(proj_{1}(split\_extended(t))) \le length(t)\, \wedge$
+\textbf{Hip\'otese Indutiva: } $length(proj_{1}(splitExtended(t))) \le length(t)\, \wedge$
 
-\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\,  $length(proj_{2}(split\_extended(t))) \le length(t)$
-
-
-Note: definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$
+\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\,  $length(proj_{2}(splitExtended(t))) \le length(t)$
 
 
-$length(proj_{1}(split\_extended(h : t)))$
+Note: definimos $(l_{1}, l_{2}, \star) := splitExtended(t)$
+
+
+$length(proj_{1}(splitExtended(h :: t)))$
 \begin{align*}
-  &= length(proj_{1}(h : l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}} \\
-  &= length(h : l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= length(proj_{1}(h :: l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}} \\
+  &= length(h :: l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
   &= 1 + length(l_{2}) &\text{Pela defini\c{c}\~ao de $length$}\\
   &\le 1 + length(t) &\text{Por HI}\\
-  &= length(h : t) &\text{Pela defini\c{c}\~ao de $length$}
+  &= length(h :: t) &\text{Pela defini\c{c}\~ao de $length$}
 \end{align*}
 
 A demonstra\c{c}\~ao do segundo item \'e an\'aloga.
 \qed
 
 \begin{lema} \label{split_lt}
-  $\forall h_{1}, h_{2} :: A, t :: [T],$
+  $\forall h_{1}, h_{2} : A, t : [T],$
 
-  \qquad $length(proj_{1}(split\_extended(h_{1} : h_{2} : t))) < length(h_{1} : h_{2} : t)$
+  \qquad $length(proj_{1}(splitExtended(h_{1} :: h_{2} :: t))) < length(h_{1}
+    :: h_{2} :: t)$
 \end{lema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 Note: esta \'e a \'unica demonstra\c{c}\~ao que n\~ao usa indu\c{c}\~ao.
 
-Definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$
+Definimos $(l_{1}, l_{2}, \star) := splitExtended(t)$
 
 \begin{align*}
-  length(proj_{1}(split\_extended(h_{1} : h_{2} : t))) &= length(proj_{1}(h_{1} : l_{1}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
-                                                       &= length(h_{1} : l_{1}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  length(proj_{1}(splitExtended(h_{1} :: h_{2} :: t))) &=
+    length(proj_{1}(h_{1} :: l_{1}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
+                                                       &= length(h_{1} :: l_{1}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
                                                        &= 1 + length(l_{1}) &\text{Pela defini\c{c}\~ao de $length$}\\
                                                        &\le 1 + length(t) &\text{Pela lema \ref{split_le}}\\
                                                        &< 2 + length(t)\\
-  &= length(h_{1} : h_{2} : t) &\text{Pela defini\c{c}\~ao de $length$}
+  &= length(h_{1} :: h_{2} :: t) &\text{Pela defini\c{c}\~ao de $length$}
 \end{align*}
 
 \qed
 
 \begin{lema}
-  $\forall h_{1}, h_{2} :: A, t :: [T],$
+  $\forall h_{1}, h_{2} : A, t : [T],$
 
-  \qquad $length(proj_{2}(split\_extended(h_{1} : h_{2} : t))) < length(h_{1} : h_{2} : t)$
+  \qquad $length(proj_{2}(splitExtended(h_{1} :: h_{2} :: t))) < length(h_{1}
+    :: h_{2} :: t)$
 \end{lema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
-An\'aloga a do lema anterior.
+An\'aloga \`a do lema anterior.
 
 \begin{teorema} \label{merge_sort_eq}
-  $\forall l :: [A], \,\, proj_{1}(merge\_sort\_extended(l)) = merge\_sort(l)$
+  $\forall l : [A], \,\, proj_{1}(mergeSortExtended(l)) = mergeSort(l)$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -1017,65 +1035,65 @@ An\'aloga a do lema anterior.
 
 Caso 1:  $l = []$
 \begin{align*}
-  proj_{1}(merge\_sort\_extended([])) &= proj_{1}([], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_1}}\\
+  proj_{1}(mergeSortExtended([])) &= proj_{1}([], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_1}}\\
                                       &= [] &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
-  &= merge\_sort([]) &\text{Pela equa\c{c}\~ao \ref{ms_1}}
+  &= mergeSort([]) &\text{Pela equa\c{c}\~ao \ref{ms_1}}
 \end{align*}
 
 Caso 2:  $l = [h]$
 \begin{align*}
-  proj_{1}(merge\_sort\_extended([h])) &= proj_{1}([h], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
+  proj_{1}(mergeSortExtended([h])) &= proj_{1}([h], \star) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
                                       &= [h] &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
-  &= merge\_sort([h]) &\text{Pela equa\c{c}\~ao \ref{ms_2}}
+  &= mergeSort([h]) &\text{Pela equa\c{c}\~ao \ref{ms_2}}
 \end{align*}
 
-Caso 3: $l = h_{1} : h_{2} : t$
+Caso 3: $l = h_{1} :: h_{2} :: t$
 
 Note: definimos
 \begin{center}
 $(l'_{1}, l'_{2}) := split(l)$\\
-$(l_{1}, l_{2}, \star) := split\_extended(l)$\\
-$(ls_{1}, \star) := merge\_sort\_extended(l_{1})$\\
-$(ls_{2}, \star) := merge\_sort\_extended(l_{2})$
+$(l_{1}, l_{2}, \star) := splitExtended(l)$\\
+$(ls_{1}, \star) := mergeSortExtended(l_{1})$\\
+$(ls_{2}, \star) := mergeSortExtended(l_{2})$
 \end{center}
 
 Para demonstrar esse caso, ser\'a necess\'ario usar a indu\c{c}\~ao transfinita, apresentada na se\c{c}\~ao 2.
-Considere o predicado $P(m)$ sendo $\forall l :: [A], \,\, length(l) = m \rightarrow \\ proj_{1}(merge\_sort\_extended(l)) =
-merge\_sort(l)$. O teorema \ref{merge_sort_eq} equivale  a $\forall m, P(m)$. Vamos assumir que o teorema vale para toda
+Considere o predicado $P(m)$ sendo $\forall l : [A], \,\, length(l) = m \rightarrow \\ proj_{1}(mergeSortExtended(l)) =
+mergeSort(l)$. O teorema \ref{merge_sort_eq} equivale  a $\forall m, P(m)$. Vamos assumir que o teorema vale para toda
 lista que tem tamanho menor que $l$. Isso implica que ele vale para $l_{1}$ e $l_{2}$, pois o lema \ref{split_lt} afirma
 que a fun\c{c}\~ao $split$ diminui o tamanho de listas que tem pelo menos 2 elementos.\\
 
-$proj_{1}(merge\_sort\_extended(h_{1} : h_{2} : t))$
+$proj_{1}(mergeSortExtended(h_{1} :: h_{2} :: t))$
 \begin{align*}
-  &= proj_{1}(merge\_extended(ls_{1}, ls_{2})) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
+  &= proj_{1}(mergeExtended(ls_{1}, ls_{2})) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
   &= merge(ls_{1}, ls_{2}) &\text{Pelo teorema \ref{merge_eq}}\\
-  &= merge(merge\_sort(l_{1}), merge\_sort(l_{2})) &\text{Por HI}\\
-  &= merge(merge\_sort(l'_{1}), merge\_sort(l'_{2})) &\text{Pelo teorema \ref{split_eq}}\\
-  &= merge\_sort(h_{1} : h_{2} : t) &\text{Pela equa\c{c}\~ao \ref{ms_3}}
+  &= merge(mergeSort(l_{1}), mergeSort(l_{2})) &\text{Por HI}\\
+  &= merge(mergeSort(l'_{1}), mergeSort(l'_{2})) &\text{Pelo teorema \ref{split_eq}}\\
+  &= mergeSort(h_{1} :: h_{2} :: t) &\text{Pela equa\c{c}\~ao \ref{ms_3}}
 \end{align*}
 
 \qed
 
 \begin{teorema}\label{split_time}
-  $\forall l :: [A], \,\, proj_{3}(split\_extended(l)) = n$
+  $\forall l : [A], \,\, proj_{3}(splitExtended(l)) = n$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l = []$
 \begin{align*}
-  proj_{3}(split\_extended([])) &= proj_{3}([], [], 0) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}} \\
+  proj_{3}(splitExtended([])) &= proj_{3}([], [], 0) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}} \\
   &= 0 &\text{Pela defini\c{c}\~ao de $proj_{3}$}
 \end{align*}
 
-\textbf{Passo Indutivo: } $l = h : t$; $n = 1 + n'$
+\textbf{Passo Indutivo: } $l = h :: t$; $n = 1 + n'$
 
-\textbf{Hip\'otese Indutiva: } $proj_{3}(split\_extended(t)) = n'$
+\textbf{Hip\'otese Indutiva: } $proj_{3}(splitExtended(t)) = n'$
 
-Note: definimos $m := proj_{3}(split\_extended(t))$
+Note: definimos $m := proj_{3}(splitExtended(t))$
 
 \begin{align*}
-  proj_{3}(split\_extended(h : t)) &= proj_{3}(\star, \star, 1 + m) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
+  proj_{3}(splitExtended(h :: t)) &= proj_{3}(\star, \star, 1 + m) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
                                    &= 1 + m &\text{Pela defini\c{c}\~ao de $proj_{3}$}\\
                                    &= 1 + n' &\text{Por HI} \\
   &= n &\text{Pela defini\c{c}\~ao de $n'$}
@@ -1085,63 +1103,64 @@ Note: definimos $m := proj_{3}(split\_extended(t))$
 \qed
 
 \begin{teorema} \label{merge_time}
-  $\forall l_{1}, l_{2} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, l_{2})) \le n_{1} + n_{2}$
+  $\forall l_{1}, l_{2} : [A], \,\, proj_{2}(mergeExtended(l_{1}, l_{2})) \le n_{1} + n_{2}$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l_{1} = []$
 \begin{align*}
-  proj_{2}(merge\_extended([], l_{2})) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}}\\
+  proj_{2}(mergeExtended([], l_{2})) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}}\\
                                        &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
   &\le 0 + n_{2}
 \end{align*}
 
-\textbf{Passo Indutivo: } $l_{1} = h_{1} : t_{1}$; $n_{1} = 1 + n'_{1}$
+\textbf{Passo Indutivo: } $l_{1} = h_{1} :: t_{1}$; $n_{1} = 1 + n'_{1}$
 
-\textbf{Hip\'otese Indutiva: } $\forall l_{2} :: [A], \,\, proj_{2}(merge\_extended(t_{1}, l_{2})) \le n'_{1} + n_{2}$
+\textbf{Hip\'otese Indutiva: } $\forall l_{2} : [A], \,\, proj_{2}(mergeExtended(t_{1}, l_{2})) \le n'_{1} + n_{2}$
 
 Mais uma vez, para demonstrar o passo indutivo, usaremos indu\c{c}\~ao na segunda lista.
 
 \textbf{Passo Base 2: } $l_{2} = []$
 \begin{align*}
-  proj_{2}(merge\_extended(h_{1} : t_{1}, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}}\\
+  proj_{2}(mergeExtended(h_{1} :: t_{1}, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}}\\
                                                &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
   &\le n_{1} + 0
 \end{align*}
 
-\textbf{Passo Indutivo 2: } $l_{2} = h_{2} :  t_{2}$; $n_{2} = 1 + n'_{2}$
+\textbf{Passo Indutivo 2: } $l_{2} = h_{2} :: t_{2}$; $n_{2} = 1 + n'_{2}$
 
-\textbf{Hip\'otese Indutiva 2: } $\forall l_{1} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, t_{2})) \le n_{1} + n'_{2}$
+\textbf{Hip\'otese Indutiva 2: } $\forall l_{1} : [A], \,\, proj_{2}(mergeExtended(l_{1}, t_{2})) \le n_{1} + n'_{2}$
 
-Note: definimos $m_{1} := proj_{2}(merge\_extended(t_{1}, h_{2} : t_{2}))$
+Note: definimos $m_{1} := proj_{2}(mergeExtended(t_{1}, h_{2} :: t_{2}))$
 
 Caso 1: $h_{1} \le h_{2}$
 
 \begin{align*}
-  proj_{2}(merge\_extended(h_{1} : t_{1}, h_{2} : t_{2})) &= proj_{2}(\star, 1 + m_{1}) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}} \\
+  proj_{2}(mergeExtended(h_{1} :: t_{1}, h_{2} :: t_{2})) &= proj_{2}(\star, 1 + m_{1}) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}} \\
                                                           &= 1 + m_{1} &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
                                                           &\le 1 + n'_{1} + n_{2} &\text{Por HI} \\
   &= n_{1} + n_{2} &\text{Pela defini\c{c}\~ao de $n'_{1}$}
 \end{align*}
 
-Observe que, na terceira igualdade estamos usando a primeira hip\'otese de indu\c{c}\~ao, tomando $l_{2} = h_{2} : t_{2}$. A prova do segundo caso, em que $h_{1} \not\le h_{2}$ \'e totalmente an\'aloga, usando a segunda hip\'otese de indu\c{c}\~ao.
+Observe que, na terceira igualdade estamos usando a primeira hip\'otese de
+indu\c{c}\~ao, tomando $l_{2} = h_{2} :: t_{2}$. A prova do segundo caso, em que $h_{1} \not\le h_{2}$ \'e totalmente an\'aloga, usando a segunda hip\'otese de indu\c{c}\~ao.
 
 \qed
 
 Para demonstrar o pr\'oximo teorema, vamos precisar do seguinte lema:
 
 \begin{lema}\label{split_half}
-  $\forall l :: [A], \,\, length(proj_{1}(split\_extended(l))) \le \ceil{\frac{n}{2}}\,\, \wedge$
+  $\forall l : [A], \,\, length(proj_{1}(splitExtended(l))) \le \ceil{\frac{n}{2}}\,\, \wedge$
 
-  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(split\_extended(l))) \le \floor{\frac{n}{2}}$
+  \qquad \qquad \qquad \qquad \,\, $length(proj_{2}(splitExtended(l))) \le \floor{\frac{n}{2}}$
 \end{lema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l = []$
 
-$length(proj_{1}(split\_extended([])))$
+$length(proj_{1}(splitExtended([])))$
 \begin{align*}
   &= length(proj_{1}([], \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_base}}\\
   &= length([]) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
@@ -1150,18 +1169,18 @@ $length(proj_{1}(split\_extended([])))$
 
 A demonstra\c{c}\~ao da segunda desigualdade \'e an\'aloga.
 
-\textbf{Passo Indutivo: } $l = h : t$; $n = 1 + n'$
+\textbf{Passo Indutivo: } $l = h :: t$; $n = 1 + n'$
 
-\textbf{Hip\'otese Indutiva: } $length(proj_{1}(split\_extended(t))) \le \ceil{\frac{n'}{2}} \,\, \wedge$
+\textbf{Hip\'otese Indutiva: } $length(proj_{1}(splitExtended(t))) \le \ceil{\frac{n'}{2}} \,\, \wedge$
 
-\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\, $length(proj_{2}(split\_extended(t))) \le \floor{\frac{n'}{2}}$
+\qquad \qquad \qquad \qquad \quad \,\,\,\,\,\, $length(proj_{2}(splitExtended(t))) \le \floor{\frac{n'}{2}}$
 
-Note: definimos $(l_{1}, l_{2}, \star) := split\_extended(t)$\\
+Note: definimos $(l_{1}, l_{2}, \star) := splitExtended(t)$\\
 
-$length(proj_{1}(split\_extended(h : t)))$
+$length(proj_{1}(splitExtended(h :: t)))$
 \begin{align*}
-  &= length(proj_{1}(h : l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
-  &= length(h : l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
+  &= length(proj_{1}(h :: l_{2}, \star, \star)) &\text{Pela equa\c{c}\~ao \ref{split_ext_ind}}\\
+  &= length(h :: l_{2}) &\text{Pela defini\c{c}\~ao de $proj_{1}$}\\
   &= 1 + length(l_{2}) &\text{Pela defini\c{c}\~ao de $length$}\\
   &\le 1 + \floor*{\frac{n'}{2}} &\text{Por HI}\\
   &= \floor*{\frac{n' + 2}{2}}\\
@@ -1174,34 +1193,36 @@ A demonstra\c{c}\~ao da segunda desigualdade \'e an\'aloga.
 \qed
 
 \begin{teorema}
-  $\forall h :: A, t :: [A], \, proj_{2}(merge\_sort\_extended(h : t)) \le 8 n \log_{2}n$
+  $\forall h : A, t : [A], \, proj_{2}(mergeSortExtended(h :: t)) \le 8 n \log_{2}n$
 \end{teorema}
-(nesse caso, $n$ = $lenght(h : t)$)\\
+(nesse caso, $n$ = $lenght(h :: t)$)\\
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 Caso 1: $t = []$
 \begin{align*}
-  proj_{2}(merge\_sort\_extended([h])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
+  proj_{2}(mergeSortExtended([h])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ms_ext_2}}\\
                                       &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
   &\le 8 * 1 * log_{2}(1)
 \end{align*}
 
-Caso 2: $t = h' : t'$
+Caso 2: $t = h' :: t'$
 
-Usaremos o mesmo argumento do teorema \ref{merge_sort_eq} para usar a hip\'otese indutiva em $proj_{1}(split\_extended(h : h' : t'))$ e $proj_{2}(split\_extended(h : h' : t'))$.
+Usaremos o mesmo argumento do teorema \ref{merge_sort_eq} para usar a hip\'otese
+indutiva em $proj_{1}(splitExtended(h :: h' :: t'))$ e
+$proj_{2}(splitExtended(h :: h' :: t'))$.
 
 Note: definimos
 \begin{center}
-  $(l_{1}, l_{2}, p) := split\_extended(h : h' : t')$\\
+  $(l_{1}, l_{2}, p) := splitExtended(h :: h' :: t')$\\
   $m_{1} := length(l_{1})$\\
   $m_{2} := length(l_{2})$\\
-  $e_{1} := proj_{2}(merge\_sort\_extended(l_{1}))$\\
-  $e_{2} := proj_{2}(merge\_sort\_extended(l_{2}))$\\
-  $q := proj_{2}(merge\_extended(l_{1}, l_{2}))$\\
+  $e_{1} := proj_{2}(mergeSortExtended(l_{1}))$\\
+  $e_{2} := proj_{2}(mergeSortExtended(l_{2}))$\\
+  $q := proj_{2}(mergeExtended(l_{1}, l_{2}))$\\
 \end{center}
 
-$proj_{2}(merge\_sort\_extended(h : h' : t'))$
+$proj_{2}(mergeSortExtended(h :: h' :: t'))$
 \begin{align*}
   &= proj_{2}(\star, q + m_{1} + m_{2} + p) &\text{Pela equa\c{c}\~ao \ref{ms_ext_3}}\\
   &= q + e_{1} + e_{2} + p &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
@@ -1224,7 +1245,7 @@ Observe que na d\'ecima linha estamos usando $4\log_{2}(n) \le 2n$. Al\'em disso
 \section{Certifica\c{c}\~oes}
 
 \begin{teorema}
-  $\forall a :: A, l :: [A], \,\, proj_{2}(insert\_extended(l)) = comparisons\_insert(l)$
+  $\forall a : A, l : [A], \,\, proj_{2}(insertExtended(l)) = comparisonsInsert(l)$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
@@ -1232,113 +1253,118 @@ Observe que na d\'ecima linha estamos usando $4\log_{2}(n) \le 2n$. Al\'em disso
 \textbf{Passo Base: } $l = []$
 
 \begin{align*}
-  proj_{2}(insert\_extended(a, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}}\\
+  proj_{2}(insertExtended(a, [])) &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{ins_ext_base}}\\
                                  &= 0 &\text{Pela defini\c{c}\~ao de } proj_{2} \\
-  &= comparisons\_insert(a, []) &\text{Pela equa\c{c}\~ao \ref{comp_ins_base}}
+  &= comparisonsInsert(a, []) &\text{Pela equa\c{c}\~ao \ref{comp_ins_base}}
 \end{align*}
 
 \textbf{Passo Indutivo: } $l = h : t$
 
-\textbf{Hip\'otese Indutiva: } $proj_{2}(insert\_extended(a, t)) = comparisons\_insert(a, t)$
+\textbf{Hip\'otese Indutiva: } $proj_{2}(insertExtended(a, t)) = comparisonsInsert(a, t)$
 
-Note: definimos $m := proj_{2}(insert\_extended(a, t))$.
+Note: definimos $m := proj_{2}(insertExtended(a, t))$.
 
 Caso 1: $a \le h$
 \begin{align*}
-  proj_{2}(insert\_extended(a, h : t)) &= proj_{2}(\star, 1) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}}\\
+  proj_{2}(insertExtended(a, h :: t)) &= proj_{2}(\star, 1) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}}\\
                                        &= 1 &\text{Pela defini\c{c}\~ao de } proj_{2} \\
-  &= comparisons\_insert(a, h : t) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}
+  &= comparisonsInsert(a, h :: t) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}
 \end{align*}
 
 Caso 2: $a \not\le h$ \\
 
-$proj_{2}(insert\_extended(a, h : t))$
+$proj_{2}(insertExtended(a, h :: t))$
 \begin{align*}
   &= proj_{2}(\star, 1 + m) &\text{Pela equa\c{c}\~ao \ref{ins_ext_ind}} \\
                                     &= 1 + m &\text{Pela defini\c{c}\~ao de } proj_{2} \\
-                                    &= 1 + proj_{2}(insert\_extended(a, t)) &\text{Pela defini\c{c}\~ao de } m\\
-                                    &= 1 + comparisons\_insert(a, t) &\text{Por HI} \\
-  &= comparisons\_insert(a, h : t) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}
+                                    &= 1 + proj_{2}(insertExtended(a, t)) &\text{Pela defini\c{c}\~ao de } m\\
+                                    &= 1 + comparisonsInsert(a, t) &\text{Por HI} \\
+  &= comparisonsInsert(a, h :: t) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}
 \end{align*}
 
 \qed
 
 \begin{teorema}
-  $\forall l_{1}, l_{2} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, l_{2})) = comparisons\_merge(l_{1}, l_{2})$
+  $\forall l_{1}, l_{2} : [A], \,\, proj_{2}(mergeExtended(l_{1}, l_{2})) = comparisonsMerge(l_{1}, l_{2})$
 \end{teorema}
 
 \noindent \textit{Demonstra\c{c}\~ao.}
 
 \textbf{Passo Base: } $l_{1} = []$\\
 
-$proj_{2}(merge\_extended([], l_{2}))$
+$proj_{2}(mergeExtended([], l_{2}))$
 \begin{align*}
   &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_2}} \\
                                        &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
-  &= comparisons\_merge([], l_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_2}} \\
+  &= comparisonsMerge([], l_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_2}} \\
 \end{align*}
 
-\textbf{Passo Indutivo: } $l_{1} = h_{1} : t_{1}$
+\textbf{Passo Indutivo: } $l_{1} = h_{1} :: t_{1}$
 
 \textbf{Hip\'otese Indutiva: }
 
 
-\qquad $\forall l_{2} :: [A], \,\, proj_{2}(merge\_extended(t_{1}, l_{2})) = comparisons\_merge(t_{1}, l_{2})$ \\
+\qquad $\forall l_{2} : [A], \,\, proj_{2}(mergeExtended(t_{1}, l_{2})) = comparisonsMerge(t_{1}, l_{2})$ \\
 
-Para demonstrar a hip\'otese indutiva faremos indu\c{c}\~ao em $l_{2}$.
+Para realizar o passo indutivo faremos indu\c{c}\~ao em $l_{2}$.
 
 \textbf{Passo Base 2: } $l_{2} = []$\\
 
-$proj_{2}(merge\_extended(h_{1} : t_{1}, []))$
+$proj_{2}(mergeExtended(h_{1} :: t_{1}, []))$
 \begin{align*}
    &= proj_{2}(\star, 0) &\text{Pela equa\c{c}\~ao \ref{merge_ext_1}} \\
                                                &= 0 &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
-  &= comparisons\_merge(h_{1} : t_{1}, []) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_1}}
+  &= comparisonsMerge(h_{1} :: t_{1}, []) &\text{Pela equa\c{c}\~ao \ref{comp_merge_base_1}}
 \end{align*}
 
-\textbf{Passo Indutivo 2: } $l_{2} = h_{2} : t_{2}$; $n_{2} = 1 + n'_{2}$
+\textbf{Passo Indutivo 2: } $l_{2} = h_{2} :: t_{2}$; $n_{2} = 1 + n'_{2}$
 
 \textbf{Hip\'otese Indutiva 2: }
 
-\qquad $\forall l_{1} :: [A], \,\, proj_{2}(merge\_extended(l_{1}, t_{2})) = comparisons\_merge(l_{1}, t_{2})$ \\
+\qquad $\forall l_{1} : [A], \,\, proj_{2}(mergeExtended(l_{1}, t_{2})) = comparisonsMerge(l_{1}, t_{2})$ \\
 
 Note: definimos
 \begin{center}
-$m_{1} := proj_{2}(merge\_extended(t_{1}, h_{2} : t_{2}))$\\
-$m_{2} := proj_{2}(merge\_extended(h_{1} : t_{1}, t_{2}))$\\
-$r_{1} := remove\_prefix(h_{1}, h_{2} : t_{2})$\\
-$r_{2} := remove\_prefix(h_{1}, t_{2})$
+$m_{1} := proj_{2}(mergeExtended(t_{1}, h_{2} :: t_{2}))$\\
+$m_{2} := proj_{2}(mergeExtended(h_{1} :: t_{1}, t_{2}))$\\
+$r_{1} := removePrefix(h_{1}, h_{2} :: t_{2})$\\
+$r_{2} := removePrefix(h_{1}, t_{2})$
 \end{center}
 
 Caso 1: $h_{1} \le h_{2}$\\
 
-$proj_{2}(merge\_extended(h_{1} : t_{1}, h_{2} : t_{2}))$
+$proj_{2}(mergeExtended(h_{1} :: t_{1}, h_{2} :: t_{2}))$
 \begin{align*}
    &= proj_{2}(\star, 1 + m_{1}) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}}\\
   &= 1 + m_{1} &\text{Pela defini\c{c}\~ao de $proj_{2}$} \\
-   &= 1 + comparisons\_merge(t_{1}, h_{2} : t_{2}) &\text{Por HI} \\
-  &= comparisons\_merge(h_{1} : t_{1}, h_{2} : t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
+   &= 1 + comparisonsMerge(t_{1}, h_{2} :: t_{2}) &\text{Por HI} \\
+  &= comparisonsMerge(h_{1} :: t_{1}, h_{2} :: t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
 \end{align*}
 
-Na terceira igualdade estamos usando a primeira hip\'otese indutiva com $l_{2} = h_{2} : t_{2}$. Como $h_{1} \le h_{2}$, temos $comparisons\_insert(h_{1}, h_{2} : t_{2}) = 1$ e $remove\_prefix(h_{1}, h_{2} : t_{2}) = h_{2} : t_{2}$, logo a \'ultima
+Na terceira igualdade estamos usando a primeira hip\'otese indutiva com $l_{2} =
+h_{2} :: t_{2}$. Como $h_{1} \le h_{2}$, temos $comparisonsInsert(h_{1}, h_{2}
+:: t_{2}) = 1$ e $removePrefix(h_{1}, h_{2} :: t_{2}) = h_{2} :: t_{2}$, logo a \'ultima
 igualdade vale. \\
 
 
 Caso 2: $h_{1} \not \le h_{2}$\\
 
-$proj_{2}(merge\_exteded(h_{1} : t_{1}, h_{2} : t_{2}))$
+$proj_{2}(merge\_exteded(h_{1} :: t_{1}, h_{2} :: t_{2}))$
 \begin{align*}
   &= proj_{2}(\star, 1 + m_{2}) &\text{Pela equa\c{c}\~ao \ref{merge_ext_3}}\\
   &= 1 + m_{2} &\text{Pela defini\c{c}\~ao de $proj_{2}$}\\
-  &= 1 + comparisons\_merge(h_{1} : t_{1}, t_{2}) &\text{Por HI} \\
-  &= 1 + comparisons\_insert(h_{1}, t_{2}) + comparisons\_merge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}\\
-  &= comparisons\_insert(h_{1}, h_{2} : t_{2}) + comparisons\_merge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}\\
-  &= comparisons\_insert(h_{1}, h_{2} : t_{2}) + comparisons\_merge(t_{1}, r_{1}) &\text{Pois $h_{1} \not \le h_{2}$}\\
-  &= comparisons\_merge(h_{1} : t_{1}, h_{2} : t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
+  &= 1 + comparisonsMerge(h_{1} :: t_{1}, t_{2}) &\text{Por HI} \\
+  &= 1 + comparisonsInsert(h_{1}, t_{2}) + comparisonsMerge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}\\
+  &= comparisonsInsert(h_{1}, h_{2} :: t_{2}) + comparisonsMerge(t_{1}, r_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_ins_ind}}\\
+  &= comparisonsInsert(h_{1}, h_{2} :: t_{2}) + comparisonsMerge(t_{1}, r_{1}) &\text{Pois $h_{1} \not \le h_{2}$}\\
+  &= comparisonsMerge(h_{1} :: t_{1}, h_{2} :: t_{2}) &\text{Pela equa\c{c}\~ao \ref{comp_merge_ind}}
 \end{align*}
 
-Na terceira igualdade estamos usando a segunda hip\'otese indutiva com $l_{1} = h_{1} : t_{1}$. Note que,
-como $h_{1} \not \le h_{2}$, vale que $comparisons\_insert(h_{1}, h_{2} : t_{2}) = 1 + comparisons\_insert(h_{1}, t_{2})$. Pelo mesmo motivo, $remove\_prefix(h_{1}, h_{2} : t_{2}) = remove\_prefix(h_{1}, t_{2})$.
+Na terceira igualdade estamos usando a segunda hip\'otese indutiva com $l_{1} =
+h_{1} :: t_{1}$. Note que,
+como $h_{1} \not \le h_{2}$, vale que $comparisonsInsert(h_{1}, h_{2} ::
+t_{2}) = 1 + \\comparisonsInsert(h_{1}, t_{2})$. Pelo mesmo motivo,
+$removePrefix(h_{1}, h_{2} :: t_{2}) =\\removePrefix(h_{1}, t_{2})$.
 
 \qed
 
@@ -1407,16 +1433,22 @@ Equivalente ao teorema~\ref{count_ins}. A t\'atica \textsf{induction} \'e usada
 usa-se a t\'atica
 \textsf{split\_ifs} para dividir entre os casos \textsf{$a \le h$} e \textsf{$a
 \not \le h$}. Por causa do \textsf{let} usado na defini\c{c}\~ao do
-\textsf{insert\_extended}, \'e necess\'ario usar a t\'atica \textsf{cases},
-que troca a chamada recursiva \textsf{insert\_extended t} pelo par \textsf{(l',
+\textsf{insertExtended}, \'e necess\'ario usar a t\'atica \textsf{cases},
+que troca a chamada recursiva \textsf{insertExtended t} pelo par \textsf{(l',
   n)}, seguido pela t\'atica \textsf{unfold}, que reescreve a defini\c{c}\~ao de
-\textsf{insert\_extended}. A t\'atica \textsf{linarith} \'e usada quando \'e necess\'ario apenas realizar c\'alculos para completar a demonstra\c{c}\~ao.
+\textsf{insertExtended}. A t\'atica \textsf{linarith} \'e usada quando \'e necess\'ario apenas realizar c\'alculos para completar a demonstra\c{c}\~ao.
 
 \subsection{Merge Sort}
 
 \subsection{Certifica\c{c}\~ao}
 
 \chapter{Conclus\~ao}
+
+% \addappheadtotoc
+\appendixpage
+\clearpage
+\appendix
+\chapter{Teoremas Secund\'arios da Se\c{c}\~ao 4}
 
 \postextual
 
