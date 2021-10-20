@@ -6,10 +6,10 @@ local infix ` ≼ ` : 50 := r
 
 namespace counting
 
-def ordered_insert (a : α) : list α → list α
-| []       := [a]
-| (h :: t) := if a ≼ h then a :: h :: t
-                       else let l' := ordered_insert t in h :: l'
+@[simp] def ordered_insert (a : α) : list α → (list α × ℕ)
+| []       := ([a], 0)
+| (h :: t) := if a ≼ h then (a :: h :: t, 1)
+                       else let (l', n) := ordered_insert t in (h :: l', n + 1)
 
 #eval ordered_insert (λ m n : ℕ , m ≤ n) 2 [5, 3, 1, 4]
 -- ([2, 5, 3, 1, 4], 0)

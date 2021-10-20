@@ -1,8 +1,8 @@
 [package]
 name = "RunTime"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.24.0"
+lean_version = "leanprover-community/lean:3.33.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "f4128dc427f8c23b280bbc9b1f44fb8cd519fc7a"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "71c203a997e9074038189ff5956cee06778c8104"}
