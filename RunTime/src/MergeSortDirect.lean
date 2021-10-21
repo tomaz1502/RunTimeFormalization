@@ -24,7 +24,8 @@ begin
     { refine add_le_add (log_monotonic half_leq) _, exact rfl.ge, },
     {
       have b_small := not_and_distrib.mp h_2,
-      simp at b_small,
+      simp only [le_refl, not_le, not_true, or_false, nat.one_lt_bit0_iff]
+           at b_small,
 
       cases b_small with b_small b_small,
       {
@@ -51,7 +52,8 @@ begin
   rw nat.log,
   split_ifs,
   { simp, },
-  simp at h,
+  simp only [le_refl, not_true, zero_le, nat.one_lt_bit0_iff, and_self, le_add_iff_nonneg_left]
+       at h,
   cases h,
 end
 
@@ -60,7 +62,8 @@ begin
   rw nat.log,
   split_ifs,
   { simp, },
-  simp at h,
+  simp only [le_refl, not_true, nat.one_lt_bit0_iff, and_self]
+       at h,
   cases h,
 end
 
@@ -110,7 +113,7 @@ begin
 end
 
 lemma div_two : ∀ (b a : ℕ), 2 * a ≤ b → a ≤ b / 2
-| 0       a       h := by { norm_num at h, simp, exact h, }
+| 0       a       h := by { norm_num at h, simp only [nat.zero_div, nonpos_iff_eq_zero], exact h, }
 | 1       0       h := by norm_num
 | 1       (a + 1) h := by { rw mul_add at h, norm_num at h, linarith, }
 | (b + 2) 0       h := bot_le
@@ -119,10 +122,10 @@ begin
   have IH : a ≤ b / 2 := begin
                           refine div_two b a _,
                           rw mul_add at h,
-                          simp at h,
+                          simp only [mul_one, add_le_add_iff_right] at h,
                           exact h,
                         end,
-  simp,
+  simp only [nat.succ_pos', nat.add_div_right],
   exact nat.succ_le_succ IH,
 end
 
@@ -137,7 +140,7 @@ theorem split_equivalence : ∀ (l : list α) ,
 | [] := by simp
 | (h :: t) :=
 begin
-  simp,
+  simp only [list.split, split],
 
   have ih := split_equivalence t,
   cases ih with ih_fst ih_snd,
@@ -148,7 +151,7 @@ begin
 
   cases t.split with t_left₂ t_right₂,
   unfold list.split,
-  simp,
+  simp only [true_and, eq_self_iff_true],
 
   exact ⟨ ih_snd, ih_fst ⟩,
 end
@@ -157,12 +160,12 @@ theorem split_complexity : ∀ (l : list α) , (split l).snd.snd = l.length
 | [] := by simp
 | (h :: t) :=
 begin
-  simp,
+  simp only [list.length, split],
   have IH := split_complexity t,
   cases split t with l₁ l₂n,
   cases l₂n with l₂ n,
   unfold split,
-  simp,
+  rw add_left_inj,
   exact IH,
 end
 
@@ -207,7 +210,7 @@ theorem split_halves_length : ∀ {l l₁ l₂ : list α} {n : ℕ},
 begin
   intros l₁ l₂ n h,
   unfold split at h,
-  simp at h,
+  simp only [prod.mk.inj_iff] at h,
   cases h  with h₁ h₂,
   cases h₂ with h₂ _,
   rw [← h₁, ← h₂],
@@ -221,7 +224,7 @@ begin
 
   have split_id : split (h :: t) = (h :: t₂, t₁, m + 1) :=
   begin
-    simp,
+    rw split,
     cases split t with t₁' t₂',
     cases t₂' with t₂' m₂,
     unfold split,
@@ -237,30 +240,39 @@ begin
 
   have IH := split_halves_length e,
   refine and.intro _ _,
-  { rw ← h_1, simp, linarith, },
-  { rw ← h_3, simp, linarith, },
+  { rw ← h_1, simp only [list.length], linarith, },
+  { rw ← h_3, simp only [list.length], linarith, },
 end
 
 include r
 
 theorem split_lengths : ∀ (l l₁ l₂ : list α) {n : ℕ},
   split l = (l₁, l₂, n) → l₁.length + l₂.length = l.length
-| []  := by { intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, }
-| [a] := by { intros l₁ l₂ n, simp, intros h₁ h₂ _, rw ← h₁, rw ← h₂, simp, }
+| []  := by { intros l₁ l₂ n,
+              simp only [and_imp, prod.mk.inj_iff, list.length, add_eq_zero_iff, split],
+              intros h₁ h₂ _,
+              rw [← h₁, ← h₂],
+              simp,
+            }
+| [a] := by { intros l₁ l₂ n,
+              simp only [and_imp, prod.mk.inj_iff, list.length_singleton, zero_add, split],
+              intros h₁ h₂ _,
+              rw [← h₁, ← h₂],
+              simp,
+            }
 | (a :: b :: t) :=
 begin
   intros l₁ l₂ n h,
   cases e : split t with l₁' l₂'m,
   cases l₂'m with l₂' m,
-  simp at h,
+  simp only [split] at h,
   rw e at h,
   unfold split at h,
   have ih := split_lengths t l₁' l₂' e,
   injection h,
   injection h_2,
-  rw ← h_1,
-  rw ← h_3,
-  simp, linarith,
+  rw [← h_1, ← h_3],
+  simp only [list.length], linarith,
 end
 
 -- MERGE DEFINITIONS
@@ -285,15 +297,15 @@ begin
   { have IH := merge_complexity t₁ (h₂ :: t₂),
     cases (merge r t₁ (h₂ :: t₂)),
     unfold merge,
-    simp at IH,
-    simp,
+    simp only [list.length] at IH,
+    simp only [list.length],
     linarith,
   },
   { have IH := merge_complexity (h₁ :: t₁) t₂,
     cases (merge r (h₁ :: t₁) t₂),
     unfold merge,
-    simp at IH,
-    simp,
+    simp only [list.length] at IH,
+    simp only [list.length],
     linarith,
   }
 end
@@ -482,7 +494,7 @@ begin
     exact split_lengths r l l₁ l₂ hs,
   end,
 
-  simp,
+  simp only [list.length],
   rw t_len_l_len,
 
   have log_l_length : 1 ≤ nat.log 2 l.length :=
@@ -493,7 +505,7 @@ begin
 
   have four_log_l_length : 4 * 1 * l.length ≤ 4 * nat.log 2 l.length * l.length :=
   begin
-    simp,
+    simp only [mul_le_mul_right, nat.succ_pos', mul_one, list.length],
     rw t_len_l_len,
     calc 4 = 4 * 1 : rfl
          ... ≤ 4 * nat.log 2 l.length : by { refine mul_le_mul' _ log_l_length, exact le_refl 4, }
@@ -528,7 +540,7 @@ begin
              , nat.sub_self (4 * 1 * l.length)
              ],
 
-          simp,
+          simp only [add_zero, mul_one, list.length],
           rw t_len_l_len,
           ring_nf,
 
