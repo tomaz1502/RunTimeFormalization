@@ -28,7 +28,6 @@ namespace counting
 #eval insertion_sort (λ m n : ℕ , m ≤ n) [5, 4, 3, 2, 1]
 -- ([1, 2, 3, 4, 5], 10)
 
-
 theorem ordered_insert_complexity (a : α) :
   ∀ l : list α, (ordered_insert r a l).snd ≤ l.length :=
 begin
