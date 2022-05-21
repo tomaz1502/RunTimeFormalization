@@ -1,5 +1,24 @@
+/-
+Copyright (c) 2022 Tomaz Gomes. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Author: Tomaz Gomes.
+-/
 import data.list.sort tactic
 import data.nat.log
+
+/-!
+# Timed Insertion Sort
+  This file defines a new version of Insertion Sort and proves properties about it's time complexity
+  and it's equivalence to the one defined in data/list/sort.lean
+
+
+## Main Definition
+  - Timed.insertion_sort : list α → (list α × ℕ)
+
+## Main Results
+  - insertion_sort_complexity : ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length
+  - insertion_sort_equivalence : ∀ l : list α, (insertion_sort r l).fst = list.insertion_sort r l
+-/
 
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
 local infix ` ≼ ` : 50 := r
@@ -9,7 +28,7 @@ namespace Timed
 @[simp] def ordered_insert (a : α) : list α → (list α × ℕ)
 | []       := ([a], 0)
 | (h :: t) := if a ≼ h then (a :: h :: t, 1)
-                       else let (l', n) := ordered_insert t in (h :: l', n + 1)
+              else let (l', n) := ordered_insert t in (h :: l', n + 1)
 
 #eval ordered_insert (λ m n : ℕ , m ≤ n) 2 [5, 3, 1, 4]
 -- ([2, 5, 3, 1, 4], 0)
@@ -19,7 +38,7 @@ namespace Timed
 
 @[simp] def insertion_sort : list α → (list α × ℕ)
 | [] := ([], 0)
-| (h :: t) := let (l', n) := (insertion_sort t) , (l'', m) := ordered_insert r h l'
+| (h :: t) := let (l', n) := (insertion_sort t), (l'', m) := ordered_insert r h l'
               in (l'', n + m)
 
 #eval insertion_sort (λ m n : ℕ , m ≤ n) [1, 2, 3, 4, 5]
@@ -33,8 +52,8 @@ theorem ordered_insert_complexity (a : α) :
 begin
   intro l,
   induction l,
-  { simp, },
-  { simp, split_ifs,
+  { simp only [list.length, ordered_insert], },
+  { simp only [list.length, ordered_insert], split_ifs,
     { simp, },
     { cases (ordered_insert r a l_tl),
       unfold ordered_insert,
@@ -48,9 +67,9 @@ theorem ordered_insert_equivalence (a : α) : ∀ l : list α,
 begin
   intro l,
   induction l,
-  { simp, },
-  { simp, split_ifs,
-    { simp, },
+  { simp only [list.ordered_insert_nil, ordered_insert, eq_self_iff_true, and_self], },
+  { simp only [list.ordered_insert, ordered_insert], split_ifs,
+    { simp only [eq_self_iff_true, and_self], },
     { cases (ordered_insert r a l_tl),
       unfold ordered_insert,
       simp,
@@ -72,12 +91,11 @@ theorem insertion_sort_preserves_length : ∀ l : list α,
 begin
   intro l,
   induction l,
-  { simp, },
-  { simp,
+  { simp only [insertion_sort], },
+  { simp only [insertion_sort, list.length],
     cases (insertion_sort r l_tl) with sorted_tl _,
     unfold insertion_sort,
-    have ordered_length :
-      (ordered_insert r l_hd sorted_tl).fst.length = sorted_tl.length + 1 :=
+    have ordered_length : (ordered_insert r l_hd sorted_tl).fst.length = sorted_tl.length + 1 :=
       ordered_insert_length r l_hd sorted_tl,
     cases (ordered_insert r l_hd sorted_tl) with sorted_list _,
     unfold insertion_sort,
@@ -86,31 +104,32 @@ begin
   }
 end
 
-theorem insertion_sort_complexity : ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length :=
+theorem insertion_sort_complexity :
+  ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length :=
 begin
   intro l,
   induction l,
-  { simp, },
-  { simp,
+  { simp only [insertion_sort, list.length, mul_zero], },
+  { simp only [insertion_sort, list.length],
     have same_lengths : (insertion_sort r l_tl).fst.length = l_tl.length :=
       insertion_sort_preserves_length r l_tl,
     cases (insertion_sort r l_tl) with sorted_tl ops,
     unfold insertion_sort,
-    have hh : (ordered_insert r l_hd sorted_tl).snd ≤
-       sorted_tl.length := ordered_insert_complexity r l_hd sorted_tl,
+    have hh : (ordered_insert r l_hd sorted_tl).snd ≤ sorted_tl.length :=
+      ordered_insert_complexity r l_hd sorted_tl,
     cases (ordered_insert r l_hd sorted_tl),
     unfold insertion_sort,
     linarith,
   }
 end
 
-theorem insertion_sort_equivalence (a : α) : ∀ l : list α,
+theorem insertion_sort_equivalence : ∀ l : list α,
   (insertion_sort r l).fst = list.insertion_sort r l :=
 begin
   intro l,
   induction l,
-  { simp, },
-  { simp,
+  { simp only [insertion_sort, list.insertion_sort], },
+  { simp only [insertion_sort, list.insertion_sort],
     rw ← l_ih,
     cases insertion_sort r l_tl,
     unfold insertion_sort,
