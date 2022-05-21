@@ -4,7 +4,7 @@ import data.nat.log
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
 local infix ` ≼ ` : 50 := r
 
-namespace counting
+namespace Timed
 
 @[simp] def ordered_insert (a : α) : list α → (list α × ℕ)
 | []       := ([a], 0)
@@ -120,4 +120,4 @@ begin
   }
 end
 
-end counting
+end Timed
