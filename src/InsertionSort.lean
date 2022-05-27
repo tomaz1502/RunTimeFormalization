@@ -31,7 +31,7 @@ namespace Timed
               else let (l', n) := ordered_insert t in (h :: l', n + 1)
 
 #eval ordered_insert (λ m n : ℕ , m ≤ n) 2 [5, 3, 1, 4]
--- ([2, 5, 3, 1, 4], 0)
+-- ([2, 5, 3, 1, 4], 1)
 
 #eval ordered_insert (λ m n : ℕ , m ≤ n) 9 [1, 0, 8]
 -- ([1, 0, 8, 9], 3)
@@ -42,7 +42,7 @@ namespace Timed
               in (l'', n + m)
 
 #eval insertion_sort (λ m n : ℕ , m ≤ n) [1, 2, 3, 4, 5]
--- ([1, 2, 3, 4, 5], 0)
+-- ([1, 2, 3, 4, 5], 4)
 
 #eval insertion_sort (λ m n : ℕ , m ≤ n) [5, 4, 3, 2, 1]
 -- ([1, 2, 3, 4, 5], 10)
