@@ -8,16 +8,16 @@ import data.nat.log
 
 /-!
 # Timed Insertion Sort
-  This file defines a new version of Insertion Sort and proves properties about it's time complexity
-  and it's equivalence to the one defined in data/list/sort.lean
-
-
+  This file defines a new version of Insertion Sort that, besides sorting the input list, counts the
+  number of comparisons made through the execution of the algorithm. Also, it presents proofs of
+  it's time complexity and it's equivalence to the one defined in data/list/sort.lean
 ## Main Definition
   - Timed.insertion_sort : list α → (list α × ℕ)
-
 ## Main Results
-  - insertion_sort_complexity : ∀ l : list α, (insertion_sort r l).snd ≤ l.length * l.length
-  - insertion_sort_equivalence : ∀ l : list α, (insertion_sort r l).fst = list.insertion_sort r l
+  - Timed.insertion_sort_complexity :
+      ∀ l : list α, (Timed.insertion_sort r l).snd ≤ l.length * l.length
+  - Timed.insertion_sort_equivalence :
+      ∀ l : list α, (Timed.insertion_sort r l).fst = list.insertion_sort r l
 -/
 
 variables {α : Type} (r : α → α → Prop) [decidable_rel r]
@@ -54,7 +54,7 @@ begin
   induction l,
   { simp only [list.length, ordered_insert], },
   { simp only [list.length, ordered_insert], split_ifs,
-    { simp, },
+    { simp only [zero_le, le_add_iff_nonneg_left], },
     { cases (ordered_insert r a l_tl),
       unfold ordered_insert,
       linarith,
@@ -72,7 +72,7 @@ begin
     { simp only [eq_self_iff_true, and_self], },
     { cases (ordered_insert r a l_tl),
       unfold ordered_insert,
-      simp,
+      simp only [true_and, eq_self_iff_true],
       exact l_ih,
     }
   }

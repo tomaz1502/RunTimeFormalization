@@ -1,7 +1,21 @@
+/-
+Copyright (c) 2022 Tomaz Gomes. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Author: Tomaz Gomes.
+-/
 import tactic
 import data.nat.log
+/-
+# Log lemmas
+  This file defines and proves some lemmas about the logarithm function (with base set fixed to 2)
+  and other arithmetic relations that will be used to prove merge sort's time complexity.
+## Main Results
+  - log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
+  - log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
+  - log_2_times : ∀ (a : ℕ), 2 * nat.log 2 (a + 2) ≤ a + 2
+-/
 
-lemma log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
+lemma log_monotonic : ∀ (a b : ℕ) , a ≤ b → nat.log 2 a ≤ nat.log 2 b
 | 0       := begin intros b _, rw nat.log, exact bot_le, end
 | (a + 1) := have (a + 1) / 2 < a + 1, from nat.div_lt_self' a 0,
 begin
@@ -14,9 +28,10 @@ begin
   rw nat.log,
   split_ifs,
   { refine ge.le _, rw nat.log, split_ifs,
-    { refine add_le_add (log_monotonic half_leq) _, exact rfl.ge, },
+    { refine add_le_add (log_monotonic ((a + 1) / 2) ((b + 1) / 2) half_leq) _, exact rfl.ge, },
     {
       have b_small := not_and_distrib.mp h_2,
+
       simp only [le_refl, not_le, not_true, or_false, nat.one_lt_bit0_iff]
            at b_small,
 
@@ -38,13 +53,13 @@ begin
 end
 
 lemma log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
-| 0 := by simp
+| 0 := by simp only [nat.log_zero_right, nat.zero_div]
 | 1 := by norm_num
 | (a + 2) :=
 begin
   rw nat.log,
   split_ifs,
-  { simp, },
+  { simp only [nat.add_succ_sub_one, add_zero], },
   simp only [le_refl, not_true, zero_le, nat.one_lt_bit0_iff, and_self, le_add_iff_nonneg_left]
        at h,
   cases h,
@@ -54,7 +69,7 @@ lemma log_2_val : nat.log 2 2 = 1 :=
 begin
   rw nat.log,
   split_ifs,
-  { simp, },
+  { simp only [nat.succ_pos', nat.log_one_right, nat.div_self], },
   simp only [le_refl, not_true, nat.one_lt_bit0_iff, and_self]
        at h,
   cases h,
@@ -80,13 +95,14 @@ begin
     cases a,
     { norm_num, rw log_2_val, simp, },
     norm_num,
-    have add_one : 2 * nat.log 2 ((a.succ.succ + 1) / 2).succ ≤
-                   2 * nat.log 2 ((a.succ.succ + 1) / 2 + 2), from
-                      by {
-                        refine mul_le_mul le_rfl _ bot_le bot_le,
-                        refine log_monotonic _,
-                        exact nat.le_succ ((a.succ.succ + 1) / 2 + 1),
-                      },
+    have add_one :
+      2 * nat.log 2 ((a.succ.succ + 1) / 2).succ ≤
+      2 * nat.log 2 ((a.succ.succ + 1) / 2 + 2), from
+      begin
+        refine mul_le_mul le_rfl _ bot_le bot_le,
+        refine log_monotonic ((a.succ.succ + 1) / 2).succ (((a.succ.succ + 1) / 2) + 2) _,
+        exact nat.le_succ ((a.succ.succ + 1) / 2 + 1),
+      end,
     refine le_trans add_one _,
     refine le_trans IH _,
     have succ_succ_two : a.succ.succ + 1 = a + 3 := rfl,
