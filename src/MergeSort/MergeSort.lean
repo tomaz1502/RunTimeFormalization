@@ -145,7 +145,7 @@ begin
             ... ≤ 4 * l.length * nat.log 2 (l.length / 2) :
                       begin
                         refine nat.mul_le_mul_left (4 * l.length) _,
-                        exact log_monotonic l₂.length (l.length / 2) l₂_length_half,
+                        exact @nat.log_monotone 2 l₂.length (l.length / 2) l₂_length_half,
                       end
   end,
 
@@ -167,7 +167,7 @@ begin
             ... ≤ 4 * (l.length + 1) * nat.log 2 l.length :
                       begin
                         refine nat.mul_le_mul_left (4 * (l.length + 1)) _,
-                        exact log_monotonic l₁.length l.length l₁_length_weak,
+                        exact @nat.log_monotone 2 l₁.length l.length l₁_length_weak,
                       end
   end,
 
@@ -203,7 +203,7 @@ begin
   begin
     calc 1 = nat.log 2 2 : log_2_val.symm
          ... ≤ nat.log 2 l.length : begin
-                                      refine log_monotonic 2 l.length _,
+                                      refine @nat.log_monotone 2 2 l.length _,
                                       linarith,
                                     end
   end,

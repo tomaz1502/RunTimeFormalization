@@ -10,47 +10,9 @@ import data.nat.log
   This file defines and proves some lemmas about the logarithm function (with base set fixed to 2)
   and other arithmetic relations that will be used to prove merge sort's time complexity.
 ## Main Results
-  - log_monotonic : ∀ {a b : ℕ} , a ≤ b → nat.log 2 a ≤ nat.log 2 b
   - log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
   - log_2_times : ∀ (a : ℕ), 2 * nat.log 2 (a + 2) ≤ a + 2
 -/
-
-lemma log_monotonic : ∀ (a b : ℕ) , a ≤ b → nat.log 2 a ≤ nat.log 2 b
-| 0       := begin intros b _, rw nat.log, exact bot_le, end
-| (a + 1) := have (a + 1) / 2 < a + 1, from nat.div_lt_self' a 0,
-begin
-  intros b h,
-  cases b,
-  { finish, },
-
-  have half_leq : (a + 1) / 2 ≤ (b + 1) / 2 := nat.div_le_div_right h,
-
-  rw nat.log,
-  split_ifs,
-  { refine ge.le _, rw nat.log, split_ifs,
-    { refine add_le_add (log_monotonic ((a + 1) / 2) ((b + 1) / 2) half_leq) _, exact rfl.ge, },
-    {
-      have b_small := not_and_distrib.mp h_2,
-
-      simp only [le_refl, not_le, not_true, or_false, nat.one_lt_bit0_iff]
-           at b_small,
-
-      cases b_small with b_small b_small,
-      {
-        have a_leq_zero := nat.succ_le_succ_iff.mp h,
-        have a_is_zero  := eq_bot_iff.mpr a_leq_zero,
-        rw a_is_zero at h_1,
-        cases h_1 with absurd _,
-        by_contradiction,
-        exact not_and.mp h_2 absurd b_small,
-      },
-      by_contra,
-      have succ_b_leq_zero := nat.succ_le_succ_iff.mp b_small,
-      exact nat.not_succ_le_zero b succ_b_leq_zero,
-    },
-  },
-  exact bot_le,
-end
 
 lemma log_pred : ∀ (a : ℕ) , nat.log 2 a - 1 = nat.log 2 (a / 2)
 | 0 := by simp only [nat.log_zero_right, nat.zero_div]
@@ -100,7 +62,7 @@ begin
       2 * nat.log 2 ((a.succ.succ + 1) / 2 + 2), from
       begin
         refine mul_le_mul le_rfl _ bot_le bot_le,
-        refine log_monotonic ((a.succ.succ + 1) / 2).succ (((a.succ.succ + 1) / 2) + 2) _,
+        refine @nat.log_monotone 2 ((a.succ.succ + 1) / 2).succ (((a.succ.succ + 1) / 2) + 2) _,
         exact nat.le_succ ((a.succ.succ + 1) / 2 + 1),
       end,
     refine le_trans add_one _,
@@ -121,19 +83,5 @@ begin
   exact bot_le,
 end
 
-lemma div_two : ∀ (b a : ℕ), 2 * a ≤ b → a ≤ b / 2
-| 0       a       h := by { norm_num at h, simp only [nat.zero_div, nonpos_iff_eq_zero], exact h, }
-| 1       0       h := by norm_num
-| 1       (a + 1) h := by { rw mul_add at h, norm_num at h, linarith, }
-| (b + 2) 0       h := bot_le
-| (b + 2) (a + 1) h :=
-begin
-  have IH : a ≤ b / 2 := begin
-                          refine div_two b a _,
-                          rw mul_add at h,
-                          simp only [mul_one, add_le_add_iff_right] at h,
-                          exact h,
-                        end,
-  simp only [nat.succ_pos', nat.add_div_right],
-  exact nat.succ_le_succ IH,
-end
+lemma div_two (b a : ℕ) : 2 * a ≤ b → a ≤ b / 2 :=
+  by simp_rw [nat.le_div_iff_mul_le _ _ zero_lt_two, mul_comm, imp_self]
